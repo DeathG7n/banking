@@ -43,7 +43,7 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
             alt="pay"
           />
           <Image 
-            src="/icons/mastercard.svg"
+            src="/icons/visa.svg"
             width={45}
             height={32}
             alt="mastercard"
@@ -60,7 +60,7 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
         />
       </Link>
 
-      {showBalance && <Copy title={account?.sharaebleId} />}
+      {showBalance && <Copy title={account?.shareableId} />}
     </div>
   )
 }
