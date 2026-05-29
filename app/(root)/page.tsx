@@ -15,7 +15,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
         availableBalance: 1000,
         currentBalance: 1000,
         officialName: "Christain",
-        mask: 1234,
+        mask: "1234",
         institutionId: "string",
         name: "Ifeanyichukwu Christain",
         type: "mastercard",
@@ -26,7 +26,59 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
     ],
     totalBanks: 2,
     totalCurrentBalance: 1000,
-    transactions: [{}],
+    transactions: [
+      {
+        id: "string;",
+        $id: "string;",
+        name: "string;",
+        paymentChannel: "string;",
+        type: "string;",
+        accountId: "string;",
+        amount: 2000,
+        pending: true,
+        category: "string;",
+        date: "string;",
+        image: "string;",
+        $createdAt: "string;",
+        channel: "string;",
+        senderBankId: "string;",
+        receiverBankId: "string;",
+      },
+      {
+        id: "string;",
+        $id: "string;",
+        name: "string;",
+        paymentChannel: "string;",
+        type: "string;",
+        accountId: "string;",
+        amount: 3000,
+        pending: true,
+        category: "string;",
+        date: "string;",
+        image: "string;",
+        $createdAt: "string;",
+        channel: "string;",
+        senderBankId: "string;",
+        receiverBankId: "string;",
+      },
+      {
+        id: "string;",
+        $id: "string;",
+        name: "string;",
+        paymentChannel: "string;",
+        type: "string;",
+        accountId: "string;",
+        amount: 3000,
+        pending: true,
+        category: "string;",
+        date: "string;",
+        image: "string;",
+        $createdAt: "string;",
+        channel: "string;",
+        senderBankId: "string;",
+        receiverBankId: "string;",
+      },
+    ],
   };
   // const accounts = await getAccounts({
   //   userId: loggedIn?.$id
@@ -57,12 +109,12 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           />
         </header>
 
-        {/* <RecentTransactions 
-          accounts={accountsData}
+        <RecentTransactions
+          accounts={account.data}
           transactions={account?.transactions}
-          appwriteItemId={appwriteItemId}
+          appwriteItemId={"appwriteItemId"}
           page={currentPage}
-        /> */}
+        />
       </div>
 
       <RightSidebar
