@@ -63,7 +63,9 @@ const AuthForm = ({ type }: { type: string }) => {
           account: {
             data: {
               currentBalance: 0,
-              name: data.firstName! + data.lastName!,
+              name: data.firstName! + " " + data.lastName!,
+              firstName: data.firstName!,
+              lastName: data.lastName!,
               tier: 1,
               type: "savings",
               accountNumber : 0

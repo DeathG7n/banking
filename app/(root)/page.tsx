@@ -9,7 +9,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
   const account = loggedIn.account
-  if(account.data.accountNumber === undefined || 0){
+  if(account.data.accountNumber === 0){
     const accountNumber = await createAccountNumber()
     console.log(accountNumber)
   }

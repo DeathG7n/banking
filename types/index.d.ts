@@ -68,6 +68,8 @@ declare type Account = {
 declare type Data = {
   currentBalance: number;
   name: string;
+  firstName: string;
+  lastName: string;
   tier: number;
   type: string;
   accountNumber: string;
@@ -148,7 +150,8 @@ declare type NewDwollaCustomerParams = {
 };
 
 declare interface CreditCardProps {
-  account: Account;
+  data: Data;
+  card: Card;
   userName: string;
   showBalance?: boolean;
 }
@@ -226,7 +229,7 @@ declare interface FooterProps {
 declare interface RightSidebarProps {
   user: User;
   transactions: Transaction[];
-  banks: Account[];
+  banks: Account;
 }
 
 declare interface SiderbarProps {
