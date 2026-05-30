@@ -2,84 +2,89 @@ import HeaderBox from "@/components/HeaderBox";
 import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
-import { getAccount, getAccounts } from "@/lib/actions/bank.actions";
+import {createAccountNumber, getAccount, getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const account = {
-    data: [
-      {
-        id: "string;",
-        availableBalance: 1000,
-        currentBalance: 1000,
-        officialName: "Christain",
-        mask: "1234",
-        institutionId: "string",
-        name: "Ifeanyichukwu Christain",
-        type: "mastercard",
-        subtype: "visa",
-        appwriteItemId: "string;",
-        shareableId: "string;",
-      },
-    ],
-    totalBanks: 2,
-    totalCurrentBalance: 1000,
-    transactions: [
-      {
-        id: "string;",
-        $id: "string;",
-        name: "string;",
-        paymentChannel: "string;",
-        type: "string;",
-        accountId: "string;",
-        amount: 2000,
-        pending: true,
-        category: "string;",
-        date: "string;",
-        image: "string;",
-        $createdAt: "string;",
-        channel: "string;",
-        senderBankId: "string;",
-        receiverBankId: "string;",
-      },
-      {
-        id: "string;",
-        $id: "string;",
-        name: "string;",
-        paymentChannel: "string;",
-        type: "string;",
-        accountId: "string;",
-        amount: 3000,
-        pending: true,
-        category: "string;",
-        date: "string;",
-        image: "string;",
-        $createdAt: "string;",
-        channel: "string;",
-        senderBankId: "string;",
-        receiverBankId: "string;",
-      },
-      {
-        id: "string;",
-        $id: "string;",
-        name: "string;",
-        paymentChannel: "string;",
-        type: "string;",
-        accountId: "string;",
-        amount: 3000,
-        pending: true,
-        category: "string;",
-        date: "string;",
-        image: "string;",
-        $createdAt: "string;",
-        channel: "string;",
-        senderBankId: "string;",
-        receiverBankId: "string;",
-      },
-    ],
-  };
+  const account = loggedIn.account
+  if(account.data.accountNumber === undefined || 0){
+    const accountNumber = await createAccountNumber()
+    console.log(accountNumber)
+  }
+  // const account = {
+  //   data: [
+  //     {
+  //       id: "string;",
+  //       availableBalance: 1000,
+  //       currentBalance: 1000,
+  //       officialName: "Christain",
+  //       mask: "1234",
+  //       institutionId: "string",
+  //       name: "Ifeanyichukwu Christain",
+  //       type: "mastercard",
+  //       subtype: "visa",
+  //       appwriteItemId: "string;",
+  //       shareableId: "string;",
+  //     },
+  //   ],
+  //   totalBanks: 2,
+  //   totalCurrentBalance: 1000,
+  //   transactions: [
+  //     {
+  //       id: "string;",
+  //       $id: "string;",
+  //       name: "string;",
+  //       paymentChannel: "string;",
+  //       type: "string;",
+  //       accountId: "string;",
+  //       amount: 2000,
+  //       pending: true,
+  //       category: "string;",
+  //       date: "string;",
+  //       image: "string;",
+  //       $createdAt: "string;",
+  //       channel: "string;",
+  //       senderBankId: "string;",
+  //       receiverBankId: "string;",
+  //     },
+  //     {
+  //       id: "string;",
+  //       $id: "string;",
+  //       name: "string;",
+  //       paymentChannel: "string;",
+  //       type: "string;",
+  //       accountId: "string;",
+  //       amount: 3000,
+  //       pending: true,
+  //       category: "string;",
+  //       date: "string;",
+  //       image: "string;",
+  //       $createdAt: "string;",
+  //       channel: "string;",
+  //       senderBankId: "string;",
+  //       receiverBankId: "string;",
+  //     },
+  //     {
+  //       id: "string;",
+  //       $id: "string;",
+  //       name: "string;",
+  //       paymentChannel: "string;",
+  //       type: "string;",
+  //       accountId: "string;",
+  //       amount: 3000,
+  //       pending: true,
+  //       category: "string;",
+  //       date: "string;",
+  //       image: "string;",
+  //       $createdAt: "string;",
+  //       channel: "string;",
+  //       senderBankId: "string;",
+  //       receiverBankId: "string;",
+  //     },
+  //   ],
+  // };
   // const accounts = await getAccounts({
   //   userId: loggedIn?.$id
   // })
@@ -103,9 +108,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           />
 
           <TotalBalanceBox
-            accounts={account.data}
-            totalBanks={account?.totalBanks}
-            totalCurrentBalance={account?.totalCurrentBalance}
+            account={account.data}
           />
         </header>
 
@@ -120,7 +123,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
       <RightSidebar
         user={loggedIn}
         transactions={account?.transactions}
-        banks={account.data?.slice(0, 2)}
+        banks={account}
       />
     </section>
   );

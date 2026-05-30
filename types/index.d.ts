@@ -31,6 +31,7 @@ declare type User = {
   userId?: string;
   dwollaCustomerUrl?: string;
   dwollaCustomerId?: string;
+  account?: Account;
   firstName: string;
   lastName: string;
   name?: string;
@@ -49,18 +50,27 @@ declare type NewUserParams = {
   password: string;
 };
 
-declare type Account = {
-  id: string;
-  availableBalance: number;
-  currentBalance: number;
-  officialName: string;
-  mask: string;
-  institutionId: string;
-  name: string;
+declare type Card = {
+  cardNumber: number;
+  expiryDate: string;
+  cvv: number;
   type: string;
-  subtype: string;
-  appwriteItemId: string;
-  shareableId: string;
+  mask: string;
+};
+
+declare type Account = {
+  data: Data;
+  card: Card;
+  hasCard: boolean;
+  transactions: Transaction[];
+};
+
+declare type Data = {
+  currentBalance: number;
+  name: string;
+  tier: number;
+  type: string;
+  accountNumber: string;
 };
 
 declare type Transaction = {
@@ -203,15 +213,14 @@ declare interface BankTabItemProps {
   appwriteItemId?: string;
 }
 
+
 declare interface TotalBalanceBoxProps {
-  accounts: Account[];
-  totalBanks: number;
-  totalCurrentBalance: number;
+  account: Data;
 }
 
 declare interface FooterProps {
   user: User;
-  type?: 'mobile' | 'desktop'
+  type?: "mobile" | "desktop";
 }
 
 declare interface RightSidebarProps {

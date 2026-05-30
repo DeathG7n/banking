@@ -14,6 +14,8 @@ import { parseStringify } from "../utils";
 
 import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
+import { MongoClient, ObjectId } from "mongodb";
+import { cookies } from "next/headers";
 
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
@@ -183,3 +185,36 @@ export const getTransactions = async ({
     console.error("An error occurred while getting the accounts:", error);
   }
 };
+
+export async function createAccountNumber() {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+  const client = new MongoClient(uri);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+  const id = cookies().get("user-id");
+  try {
+    const user = await users.findOne({
+      _id: new ObjectId(id!.value),
+    });
+    const str = String(user!._id)
+    const accountNumber = str.replace(/\D/g, "").slice(0, 10);
+
+    const account = user!.account
+    account!.data.accountNumber = accountNumber
+
+    await users.findOneAndUpdate(
+      { _id: new ObjectId(id!.value) },
+      { $set: { account : account } },
+    );
+
+    return parseStringify(accountNumber);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
