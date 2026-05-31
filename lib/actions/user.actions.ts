@@ -115,7 +115,12 @@ export const signUp = async (userData: SignUpParams) => {
     if (existingUser) {
       throw new Error("User already exists");
     }
-    const newUser = await users.insertOne(userData);
+    const user = {
+      ...userData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const newUser = await users.insertOne(user);
 
     cookies().set("user-email", userData.email, {
       path: "/",
@@ -214,7 +219,7 @@ export async function getLoggedInUser() {
 export const logoutAccount = async () => {
   try {
     cookies().delete("user-id");
-    return "Account Logged Out"
+    return "Account Logged Out";
   } catch (error) {
     return null;
   }

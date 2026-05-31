@@ -5,9 +5,9 @@ export const sidebarLinks = [
     label: "Home",
   },
   {
-    imgURL: "/icons/dollar-circle.svg",
-    route: "/my-banks",
-    label: "My Banks",
+    imgURL: "/icons/monitor.svg",
+    route: "/profile",
+    label: "My Profile",
   },
   {
     imgURL: "/icons/transaction.svg",
@@ -18,6 +18,16 @@ export const sidebarLinks = [
     imgURL: "/icons/money-send.svg",
     route: "/payment-transfer",
     label: "Transfer Funds",
+  },
+  {
+    imgURL: "/icons/a-coffee.svg",
+    route: "/setting",
+    label: "Settings",
+  },
+  {
+    imgURL: "/icons/credit-card.svg",
+    route: "/card-application",
+    label: "Card Application",
   },
 ];
 
