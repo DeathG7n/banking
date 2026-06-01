@@ -7,9 +7,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { createTransfer } from "@/lib/actions/dwolla.actions";
-import { createTransaction } from "@/lib/actions/transaction.actions";
-import { getBank, getBankByAccountId } from "@/lib/actions/user.actions";
+//import { createTransfer } from "@/lib/actions/dwolla.actions";
+import { createTransfer, createTransaction } from "@/lib/actions/transaction.actions";
+import {
+  getActiveAccounts,
+  getAccountById,
+} from "@/lib/actions/user.actions";
 import { decryptId } from "@/lib/utils";
 
 import { BankDropdown } from "./BankDropdown";
@@ -25,18 +28,34 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { TransferLedgerSweepSimulateEventType } from "plaid";
+
+let activeAccounts: string[] = [];
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().min(4, "Transfer note is too short"),
-  amount: z.string().min(4, "Amount is too short"),
+  amount: z.string().min(1, "Amount is too short"),
   senderBank: z.string().min(4, "Please select a valid bank account"),
-  sharableId: z.string().min(8, "Please select a valid sharable Id"),
+  receiverBank: z
+    .string()
+    .min(8, "Please enter a valid bank account")
+    .refine((val) => activeAccounts.includes(val as any), {
+      message: "Bank account doesn't exists",
+    })
+}).refine((data) => data.senderBank !== data.receiverBank, {
+  message: "Can't send to same account",
+  path: ["receiverBank"], // Highlights the error specifically on this field
 });
 
-const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
+const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  const getAccounts = async () => {
+    activeAccounts = await getActiveAccounts();
+  };
+  getAccounts();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +64,7 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
       email: "",
       amount: "",
       senderBank: "",
-      sharableId: "",
+      receiverBank: "",
     },
   });
 
@@ -53,15 +72,12 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
     setIsLoading(true);
 
     try {
-      const receiverAccountId = decryptId(data.sharableId);
-      const receiverBank = await getBankByAccountId({
-        accountId: receiverAccountId,
-      });
-      const senderBank = await getBank({ documentId: data.senderBank });
+      const receiverBank = await getAccountById({ accountId: data.receiverBank });
+      const senderBank = await getAccountById({ accountId: data.senderBank });
 
       const transferParams = {
-        sourceFundingSourceUrl: senderBank.fundingSourceUrl,
-        destinationFundingSourceUrl: receiverBank.fundingSourceUrl,
+        sender: senderBank,
+        receiver: receiverBank,
         amount: data.amount,
       };
       // create transfer
@@ -70,12 +86,11 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
       // create transfer transaction
       if (transfer) {
         const transaction = {
-          name: data.name,
+          description: data.name,
           amount: data.amount,
-          senderId: senderBank.userId.$id,
-          senderBankId: senderBank.$id,
-          receiverId: receiverBank.userId.$id,
-          receiverBankId: receiverBank.$id,
+          status: "Processed",
+          sender: transfer.sender,
+          receiver: transfer.receiver,
           email: data.email,
         };
 
@@ -113,7 +128,7 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <BankDropdown
-                      accounts={accounts}
+                      account={account}
                       setValue={form.setValue}
                       otherStyles="!w-full"
                     />
@@ -190,17 +205,17 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
 
         <FormField
           control={form.control}
-          name="sharableId"
+          name="receiverBank"
           render={({ field }) => (
             <FormItem className="border-t border-gray-200">
               <div className="payment-transfer_form-item pb-5 pt-6">
                 <FormLabel className="text-14 w-full max-w-[280px] font-medium text-gray-700">
-                  Receiver&apos;s Plaid Sharable Id
+                  Recipient&apos;s Account Number
                 </FormLabel>
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <Input
-                      placeholder="Enter the public account number"
+                      placeholder="Enter the recipient's account number"
                       className="input-class"
                       {...field}
                     />
@@ -237,7 +252,11 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
         />
 
         <div className="payment-transfer_btn-box">
-          <Button type="submit" className="payment-transfer_btn">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="payment-transfer_btn"
+          >
             {isLoading ? (
               <>
                 <Loader2 size={20} className="animate-spin" /> &nbsp; Sending...

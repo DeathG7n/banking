@@ -40,7 +40,7 @@ const MyBanks = async () => {
           <div className="relative size-4"></div>
           <p className="text-14 text-gray-500">Email</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
-            <Image src={"./icons/account.svg"} alt="account" width={25} height={25} className="brightness-[3]"/>
+            <Image src={"./icons/email.svg"} alt="account" width={25} height={25} className="brightness-[3]"/>
             <p className="text-gray-500">{loggedIn.email}</p>
           </span>
         </div>
@@ -48,7 +48,7 @@ const MyBanks = async () => {
           <div className="relative size-4"></div>
           <p className="text-14 text-gray-500">Date Of Birth</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
-            <Image src={"./icons/account.svg"} alt="account" width={25} height={25} className="brightness-[3]"/>
+            <Image src={"./icons/date.svg"} alt="account" width={20} height={20} className="brightness-[3]"/>
             <p className="text-gray-500">{loggedIn.dateOfBirth}</p>
           </span>
         </div>
@@ -56,7 +56,7 @@ const MyBanks = async () => {
           <div className="relative size-4"></div>
           <p className="text-14 text-gray-500">Address</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
-            <Image src={"./icons/account.svg"} alt="account" width={25} height={25} className="brightness-[3]"/>
+            <Image src={"./icons/maps.svg"} alt="account" width={15} height={15} className="brightness-[3]"/>
             <p className="text-gray-500">{loggedIn.address1}</p>
           </span>
         </div>
@@ -64,7 +64,7 @@ const MyBanks = async () => {
           <div className="relative size-4"></div>
           <p className="text-14 text-gray-500">Location</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
-            <Image src={"./icons/account.svg"} alt="account" width={25} height={25} className="brightness-[3]"/>
+            <Image src={"./icons/globe.svg"} alt="account" width={20} height={20} className="brightness-[3]"/>
             <p className="text-gray-500">{loggedIn.city}{", "}{loggedIn.state}</p>
           </span>
         </div>

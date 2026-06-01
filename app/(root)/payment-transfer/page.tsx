@@ -6,13 +6,8 @@ import React from 'react'
 
 const Transfer = async () => {
   const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn?.$id 
-  })
-
-  if(!accounts) return;
   
-  const accountsData = accounts?.data;
+  const account = loggedIn.account;
 
   return (
     <section className="payment-transfer">
@@ -22,7 +17,7 @@ const Transfer = async () => {
       />
 
       <section className="size-full pt-5">
-        <PaymentTransferForm accounts={accountsData} />
+        <PaymentTransferForm account={account} />
       </section>
     </section>
   )

@@ -68,7 +68,7 @@ const AuthForm = ({ type }: { type: string }) => {
               lastName: data.lastName!,
               tier: 1,
               type: "savings",
-              accountNumber : 0
+              accountNumber: 0,
             },
             card: {
               cardNumber: 0,

@@ -125,8 +125,8 @@ declare type Receiver = {
 };
 
 declare type TransferParams = {
-  sourceFundingSourceUrl: string;
-  destinationFundingSourceUrl: string;
+  sender: Account;
+  receiver: Account;
   amount: string;
 };
 
@@ -206,7 +206,7 @@ declare interface AuthFormProps {
 }
 
 declare interface BankDropdownProps {
-  accounts: Account[];
+  account: Account;
   setValue?: UseFormSetValue<any>;
   otherStyles?: string;
 }
@@ -215,7 +215,6 @@ declare interface BankTabItemProps {
   account: Account;
   appwriteItemId?: string;
 }
-
 
 declare interface TotalBalanceBoxProps {
   account: Data;
@@ -265,7 +264,7 @@ declare interface DoughnutChartProps {
 }
 
 declare interface PaymentTransferFormProps {
-  accounts: Account[];
+  account: Account;
 }
 
 // Actions
@@ -293,12 +292,11 @@ declare interface CreateFundingSourceOptions {
 }
 
 declare interface CreateTransactionProps {
-  name: string;
+  description: string;
   amount: string;
-  senderId: string;
-  senderBankId: string;
-  receiverId: string;
-  receiverBankId: string;
+  status: string;
+  sender: User;
+  receiver: User;
   email: string;
 }
 
@@ -337,6 +335,6 @@ declare interface getBankProps {
   documentId: string;
 }
 
-declare interface getBankByAccountIdProps {
+declare interface getAccountByIdProps {
   accountId: string;
 }

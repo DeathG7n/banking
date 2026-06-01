@@ -3,6 +3,7 @@
 import { ID, Query } from "node-appwrite";
 import { createAdminClient } from "../appwrite";
 import { parseStringify } from "../utils";
+import { MongoClient, ObjectId } from "mongodb";
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -59,3 +60,36 @@ export const getTransactionsByBankId = async ({bankId}: getTransactionsByBankIdP
     console.log(error);
   }
 }
+
+export const createTransfer = async ({
+  ...transferParams
+}: TransferParams) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = await db.collection('users').find({}).toArray()
+  try {
+    const sender = users.find(user => user?.account === transferParams.sender)
+    const receiver = users.find(user => user?.account === transferParams.receiver)
+    transferParams.sender.data.currentBalance = transferParams.sender.data.currentBalance - Number(transferParams.amount)
+    transferParams.receiver.data.currentBalance = transferParams.receiver.data.currentBalance + Number(transferParams.amount)
+
+    await db.collection('users').findOneAndUpdate(
+      { _id: new ObjectId(sender?._id!) },
+      { $set: { account: transferParams.sender } },
+    );
+    await db.collection('users').findOneAndUpdate(
+      { _id: new ObjectId(receiver?._id!) },
+      { $set: { account: transferParams.receiver } },
+    );
+    const transfer = {
+      sender : sender,
+      receiver: receiver
+    }
+    return parseStringify(transfer);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};

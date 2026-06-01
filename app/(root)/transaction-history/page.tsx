@@ -9,16 +9,15 @@ import React from 'react'
 const TransactionHistory = async ({ searchParams: { id, page }}:SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn?.$id 
-  })
+  const account = loggedIn.account
+  console.log(account)
 
-  if(!accounts) return;
+  // if(!accounts) return;
   
-  const accountsData = accounts?.data;
-  const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
+  // const accountsData = accounts?.data;
+  // const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
 
-  const account = await getAccount({ appwriteItemId })
+  // const account = await getAccount({ appwriteItemId })
 
 
 const rowsPerPage = 10;
@@ -44,10 +43,10 @@ const currentTransactions = account?.transactions.slice(
           <div className="flex flex-col gap-2">
             <h2 className="text-18 font-bold text-white">{account?.data.name}</h2>
             <p className="text-14 text-blue-25">
-              {account?.data.officialName}
+              { " "}
             </p>
-            <p className="text-14 font-semibold tracking-[1.1px] text-white">
-              ●●●● ●●●● ●●●● {account?.data.mask}
+            <p className="text-24 font-semibold tracking-[1.1px] text-white">
+              {account?.data.accountNumber}
             </p>
           </div>
           
