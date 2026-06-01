@@ -11,53 +11,81 @@ const {
 } = process.env;
 
 export const createTransaction = async (transaction: CreateTransactionProps) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = await db.collection('users').find({}).toArray()
   try {
-    const { database } = await createAdminClient();
+    const sender = users.find(user => user?.account === transaction.sender.account)
+    const receiver = users.find(user => user?.account === transaction.receiver.account)
+    const senderTransactions = sender!.account.transactions
+    const receiverTransactions = receiver!.account.transactions
 
-    const newTransaction = await database.createDocument(
-      DATABASE_ID!,
-      TRANSACTION_COLLECTION_ID!,
-      ID.unique(),
-      {
-        channel: 'online',
-        category: 'Transfer',
-        ...transaction
-      }
-    )
+    const senderTransaction = {
+      description: transaction.description,
+      amount: transaction.amount,
+      status: "Processed",
+      sender: transaction.sender,
+      receiver: transaction.receiver,
+      email: transaction.email,
+      createdAt: new Date(),
+      category: "Debit"
+    };
 
-    return parseStringify(newTransaction);
-  } catch (error) {
-    console.log(error);
-  }
-}
+    const receiverTransaction = {
+      description: transaction.description,
+      amount: transaction.amount,
+      status: "Processed",
+      sender: transaction.sender,
+      receiver: transaction.receiver,
+      email: transaction.email,
+      createdAt: new Date(),
+      category: "Credit"
+    };
 
-export const getTransactionsByBankId = async ({bankId}: getTransactionsByBankIdProps) => {
-  try {
-    const { database } = await createAdminClient();
+    senderTransactions.push(senderTransaction)
+    receiverTransactions.push(receiverTransaction)
 
-    const senderTransactions = await database.listDocuments(
-      DATABASE_ID!,
-      TRANSACTION_COLLECTION_ID!,
-      [Query.equal('senderBankId', bankId)],
-    )
+    sender!.account.transactions = senderTransactions
+    receiver!.account.transactions = receiverTransactions
 
-    const receiverTransactions = await database.listDocuments(
-      DATABASE_ID!,
-      TRANSACTION_COLLECTION_ID!,
-      [Query.equal('receiverBankId', bankId)],
+
+
+    await db.collection('users').findOneAndUpdate(
+      { _id: new ObjectId(sender?._id!) },
+      { $set: { account: sender!.account } },
     );
-
+    await db.collection('users').findOneAndUpdate(
+      { _id: new ObjectId(receiver?._id!) },
+      { $set: { account: receiver!.account } },
+    );
     const transactions = {
-      total: senderTransactions.total + receiverTransactions.total,
-      documents: [
-        ...senderTransactions.documents, 
-        ...receiverTransactions.documents,
-      ]
+      sender : senderTransaction,
+      receiver: receiverTransactions
     }
-
     return parseStringify(transactions);
   } catch (error) {
     console.log(error);
+    return null;
+  }
+}
+
+export const getTransactionsByAccountId = async ({accountId}: getTransactionsByAccountIdProps) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+  try {
+    const user = await users.findOne({
+      _id: new ObjectId(accountId),
+    });
+    const transactions = user!.account!.transactions
+    return parseStringify(transactions);
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 }
 

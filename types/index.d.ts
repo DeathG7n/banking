@@ -300,8 +300,8 @@ declare interface CreateTransactionProps {
   email: string;
 }
 
-declare interface getTransactionsByBankIdProps {
-  bankId: string;
+declare interface getTransactionsByAccountIdProps {
+  accountId: string;
 }
 
 declare interface signInProps {

@@ -8,11 +8,11 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 //import { createTransfer } from "@/lib/actions/dwolla.actions";
-import { createTransfer, createTransaction } from "@/lib/actions/transaction.actions";
 import {
-  getActiveAccounts,
-  getAccountById,
-} from "@/lib/actions/user.actions";
+  createTransfer,
+  createTransaction,
+} from "@/lib/actions/transaction.actions";
+import { getActiveAccounts, getAccountById } from "@/lib/actions/user.actions";
 import { decryptId } from "@/lib/utils";
 
 import { BankDropdown } from "./BankDropdown";
@@ -32,30 +32,40 @@ import { TransferLedgerSweepSimulateEventType } from "plaid";
 
 let activeAccounts: string[] = [];
 
-const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  name: z.string().min(4, "Transfer note is too short"),
-  amount: z.string().min(1, "Amount is too short"),
-  senderBank: z.string().min(4, "Please select a valid bank account"),
-  receiverBank: z
-    .string()
-    .min(8, "Please enter a valid bank account")
-    .refine((val) => activeAccounts.includes(val as any), {
-      message: "Bank account doesn't exists",
-    })
-}).refine((data) => data.senderBank !== data.receiverBank, {
-  message: "Can't send to same account",
-  path: ["receiverBank"], // Highlights the error specifically on this field
-});
+const formSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    name: z.string().min(4, "Transfer note is too short"),
+    amount: z.string().min(1, "Amount is too short"),
+    senderBank: z.string().min(4, "Please select a valid bank account"),
+    receiverBank: z
+      .string()
+      .min(8, "Please enter a valid bank account")
+      .refine((val) => activeAccounts.includes(val as any), {
+        message: "Bank account doesn't exists",
+      }),
+  })
+  .refine((data) => data.senderBank !== data.receiverBank, {
+    message: "Can't send to same account",
+    path: ["receiverBank"], // Highlights the error specifically on this field
+  });
 
 const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [recipient, setRecipient] = useState<Data | null>(null);
 
   const getAccounts = async () => {
     activeAccounts = await getActiveAccounts();
   };
   getAccounts();
+
+  const change = async (e: any) => {
+    const receiverBank = await getAccountById({ accountId: e.target.value });
+    if (receiverBank) {
+      setRecipient(receiverBank.data);
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,7 +82,9 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
     setIsLoading(true);
 
     try {
-      const receiverBank = await getAccountById({ accountId: data.receiverBank });
+      const receiverBank = await getAccountById({
+        accountId: data.receiverBank,
+      });
       const senderBank = await getAccountById({ accountId: data.senderBank });
 
       const transferParams = {
@@ -88,7 +100,7 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
         const transaction = {
           description: data.name,
           amount: data.amount,
-          status: "Processed",
+          status: "Success",
           sender: transfer.sender,
           receiver: transfer.receiver,
           email: data.email,
@@ -221,6 +233,9 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
                     />
                   </FormControl>
                   <FormMessage className="text-12 text-red-500" />
+                  {recipient && (
+                    <p className="text-12 text-blue-500">{recipient!.name}</p>
+                  )}
                 </div>
               </div>
             </FormItem>
