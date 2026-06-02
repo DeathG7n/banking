@@ -12,7 +12,11 @@ import {
   createTransfer,
   createTransaction,
 } from "@/lib/actions/transaction.actions";
-import { getActiveAccounts, getAccountById } from "@/lib/actions/user.actions";
+import {
+  getActiveAccounts,
+  getAccountById,
+  getLoggedInUser,
+} from "@/lib/actions/user.actions";
 import { decryptId } from "@/lib/utils";
 
 import { BankDropdown } from "./BankDropdown";
@@ -31,12 +35,18 @@ import { Textarea } from "./ui/textarea";
 import { TransferLedgerSweepSimulateEventType } from "plaid";
 
 let activeAccounts: string[] = [];
+let user: User;
 
 const formSchema = z
   .object({
     email: z.string().email("Invalid email address"),
     name: z.string().min(4, "Transfer note is too short"),
-    amount: z.string().min(1, "Amount is too short"),
+    amount: z
+      .string()
+      .min(1, "Amount is too short")
+      .refine((val) => Number(val) <= user!.account!.data!.currentBalance, {
+        message: "Amount is greater than account balance",
+      }),
     senderBank: z.string().min(4, "Please select a valid bank account"),
     receiverBank: z
       .string()
@@ -55,10 +65,14 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [recipient, setRecipient] = useState<Data | null>(null);
 
+  
+
   const getAccounts = async () => {
+    user = await getLoggedInUser()
     activeAccounts = await getActiveAccounts();
   };
   getAccounts();
+  console.log(activeAccounts);
 
   const change = async (e: any) => {
     const receiverBank = await getAccountById({ accountId: e.target.value });

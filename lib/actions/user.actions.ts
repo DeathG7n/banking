@@ -152,13 +152,10 @@ export async function getActiveAccounts() {
   try {
     let accounts = []
     for (let i = 0; i < users.length; i++) {
-      const account = {
-        account : users[i].account.data.accountNumber,
-        balance : users[i].account.data.currentBalance,
-      }
-      
-      accounts.push(account)
+      const account = users[i].account
+      accounts.push(String(account.data.accountNumber))
     }
+    console.log(accounts)
     return parseStringify(accounts);
   } catch (error) {
     console.log(error);
