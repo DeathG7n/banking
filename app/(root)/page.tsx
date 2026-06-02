@@ -2,17 +2,13 @@ import HeaderBox from "@/components/HeaderBox";
 import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
-import {createAccountNumber, getAccount, getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
   const account = loggedIn.account
-  if(account.data.accountNumber === 0){
-    const accountNumber = await createAccountNumber()
-    console.log(accountNumber)
-  }
+  
   // const account = {
   //   data: [
   //     {

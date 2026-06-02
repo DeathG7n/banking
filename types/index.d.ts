@@ -72,7 +72,7 @@ declare type Data = {
   lastName: string;
   tier: number;
   type: string;
-  accountNumber: string;
+  accountNumber: number;
 };
 
 declare type Transaction = {

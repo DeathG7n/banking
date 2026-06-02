@@ -15,6 +15,7 @@ import { plaidClient } from "@/lib/plaid";
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from "./dwolla.actions";
 import { MongoClient, ObjectId } from "mongodb";
+import { createAccountNumber } from "./bank.actions";
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -122,6 +123,10 @@ export async function getLoggedInUser() {
       _id: new ObjectId(id!.value),
     });
 
+    if (user!.account!.data!.accountNumber === 0) {
+      await createAccountNumber();
+    }
+
     return parseStringify(user);
   } catch (error) {
     console.log(error);
@@ -147,8 +152,12 @@ export async function getActiveAccounts() {
   try {
     let accounts = []
     for (let i = 0; i < users.length; i++) {
-      const account = users[i].account
-      accounts.push(account.data.accountNumber)
+      const account = {
+        account : users[i].account.data.accountNumber,
+        balance : users[i].account.data.currentBalance,
+      }
+      
+      accounts.push(account)
     }
     return parseStringify(accounts);
   } catch (error) {

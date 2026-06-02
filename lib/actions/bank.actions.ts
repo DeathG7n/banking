@@ -205,7 +205,7 @@ export async function createAccountNumber() {
     const accountNumber = str.replace(/\D/g, "").slice(0, 10);
 
     const account = user!.account
-    account!.data.accountNumber = accountNumber
+    account!.data.accountNumber = Number(accountNumber)
 
     await users.findOneAndUpdate(
       { _id: new ObjectId(id!.value) },
