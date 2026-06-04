@@ -155,7 +155,6 @@ export async function getActiveAccounts() {
       const account = users[i].account
       accounts.push(String(account.data.accountNumber))
     }
-    console.log(accounts)
     return parseStringify(accounts);
   } catch (error) {
     console.log(error);

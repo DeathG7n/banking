@@ -3,7 +3,6 @@ import AnimatedCounter from "./AnimatedCounter";
 import DoughnutChart from "./DoughnutChart";
 
 const TotalBalanceBox = ({ account }: TotalBalanceBoxProps) => {
-  console.log(account);
   return (
     <section className="total-balance">
       <div className="flex justify-between gap-6">

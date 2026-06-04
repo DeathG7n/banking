@@ -11,21 +11,32 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { formUrlQuery, formatAmount } from "@/lib/utils";
 
-export const BankDropdown = ({
-  account,
-  setValue,
-  otherStyles,
-}: BankDropdownProps) => {
+export const CardDropdown = ({ setValue, otherStyles }: CardDropdownProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [selected, setSelected] = useState(account);
+  const [selected, setSelected] = useState("account");
+
+  const cardTypes = [
+    {
+      name : "Verve",
+      type : "verve"
+    },
+    {
+      name : "Visa",
+      type : "visa"
+    },
+    {
+      name : "Mastercard",
+      type : "mastercard"
+    },
+  ];
 
   const handleBankChange = (id: string) => {
-    setSelected(account);
+    setSelected("");
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       key: "id",
@@ -39,9 +50,7 @@ export const BankDropdown = ({
   };
 
   return (
-    <Select
-      onValueChange={(value) => handleBankChange(value)}
-    >
+    <Select onValueChange={(value) => handleBankChange(value)}>
       <SelectTrigger
         className={`flex w-full bg-white gap-3 md:w-[300px] ${otherStyles}`}
       >
@@ -51,7 +60,7 @@ export const BankDropdown = ({
           height={20}
           alt="account"
         />
-        <SelectValue placeholder="Select an account" />
+        <SelectValue placeholder="Select a card type" />
         {/* <p className="line-clamp-1 w-full text-left">{account.data.name}</p> */}
       </SelectTrigger>
       <SelectContent
@@ -60,19 +69,21 @@ export const BankDropdown = ({
       >
         <SelectGroup>
           <SelectLabel className="py-2 font-normal text-gray-500">
-            Select a bank to display
+            Select a card type
           </SelectLabel>
-          <SelectItem
-              value={String(account.data.accountNumber)}
-              className="cursor-pointer border-t"
-            >
-              <div className="flex flex-col ">
-                <p className="text-16 font-medium">{account.data.name}</p>
-                <p className="text-14 font-medium text-blue-600">
-                  {formatAmount(account.data.currentBalance)}
-                </p>
-              </div>
-            </SelectItem>
+
+          {cardTypes.map((type) => {
+            return (
+              <SelectItem
+                value={type.type}
+                className="cursor-pointer border-t"
+              >
+                <div className="flex flex-col ">
+                  <p className="text-16 font-medium">{type.name}</p>
+                </div>
+              </SelectItem>
+            );
+          })}
         </SelectGroup>
       </SelectContent>
     </Select>

@@ -19,7 +19,7 @@ import {
 } from "@/lib/actions/user.actions";
 import { decryptId } from "@/lib/utils";
 
-import { BankDropdown } from "./BankDropdown";
+import { CardDropdown } from "./CardDropdown";
 import { Button } from "./ui/button";
 import {
   Form,
@@ -60,7 +60,7 @@ const formSchema = z
     path: ["receiverBank"], // Highlights the error specifically on this field
   });
 
-const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
+const CardApplicationForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [recipient, setRecipient] = useState<Data | null>(null);
@@ -152,8 +152,7 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
                 </div>
                 <div className="flex w-full flex-col">
                   <FormControl>
-                    <BankDropdown
-                      account={account}
+                    <CardDropdown
                       setValue={form.setValue}
                       otherStyles="!w-full"
                     />
@@ -243,7 +242,6 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
                       placeholder="Enter the recipient's account number"
                       className="input-class"
                       {...field}
-                      onChange={(e) => change(e)}
                     />
                   </FormControl>
                   <FormMessage className="text-12 text-red-500" />
@@ -300,4 +298,4 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   );
 };
 
-export default PaymentTransferForm;
+export default CardApplicationForm;

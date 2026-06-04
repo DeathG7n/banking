@@ -62,6 +62,8 @@ declare type Card = {
 };
 
 declare type Account = {
+  idCard: string;
+  image: string;
   data: Data;
   card: Card;
   hasCard: boolean;
@@ -210,6 +212,11 @@ declare interface AuthFormProps {
 
 declare interface BankDropdownProps {
   account: Account;
+  setValue?: UseFormSetValue<any>;
+  otherStyles?: string;
+}
+
+declare interface CardDropdownProps {
   setValue?: UseFormSetValue<any>;
   otherStyles?: string;
 }
