@@ -52,12 +52,15 @@ const AuthForm = ({ type }: { type: string }) => {
         const userData = {
           firstName: data.firstName!,
           lastName: data.lastName!,
-          address1: data.address1!,
-          city: data.city!,
+          address: data.address!,
+          country: data.country!,
           state: data.state!,
           postalCode: data.postalCode!,
           dateOfBirth: data.dateOfBirth!,
-          ssn: data.ssn!,
+          gender: data.gender!,
+          maritalStatus: data.maritalStatus!,
+          occupation: data.occupation!,
+          mobileNumber: data.mobileNumber!,
           email: data.email,
           password: data.password,
           account: {
@@ -155,15 +158,15 @@ const AuthForm = ({ type }: { type: string }) => {
                   </div>
                   <CustomInput
                     control={form.control}
-                    name="address1"
+                    name="address"
                     label="Address"
                     placeholder="Enter your specific address"
                   />
                   <CustomInput
                     control={form.control}
-                    name="city"
-                    label="City"
-                    placeholder="Enter your city"
+                    name="country"
+                    label="Country"
+                    placeholder="Enter your country"
                   />
                   <div className="flex gap-4">
                     <CustomInput
@@ -188,11 +191,31 @@ const AuthForm = ({ type }: { type: string }) => {
                     />
                     <CustomInput
                       control={form.control}
-                      name="ssn"
-                      label="SSN"
-                      placeholder="Example: 1234"
+                      name="gender"
+                      label="Gender"
+                      placeholder="Enter your gender"
                     />
                   </div>
+                  <div className="flex gap-4">
+                    <CustomInput
+                      control={form.control}
+                      name="mobileNumber"
+                      label="Mobile Number"
+                      placeholder="0**********"
+                    />
+                    <CustomInput
+                      control={form.control}
+                      name="maritalStatus"
+                      label="Marital Status"
+                      placeholder="Your marital status"
+                    />
+                  </div>
+                  <CustomInput
+                    control={form.control}
+                    name="occupation"
+                    label="Occupation"
+                    placeholder="What do you do for a living?"
+                  />
                 </>
               )}
 

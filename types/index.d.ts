@@ -10,12 +10,15 @@ declare type SearchParamProps = {
 declare type SignUpParams = {
   firstName: string;
   lastName: string;
-  address1: string;
-  city: string;
+  address: string;
+  country: string;
   state: string;
   postalCode: string;
   dateOfBirth: string;
-  ssn: string;
+  gender: string;
+  maritalStatus: string;
+  occupation: string;
+  mobileNumber: string;
   email: string;
   password: string;
 };
@@ -28,19 +31,19 @@ declare type LoginUser = {
 declare type User = {
   $id?: string;
   email?: string;
-  userId?: string;
-  dwollaCustomerUrl?: string;
-  dwollaCustomerId?: string;
+  gender: string;
+  maritalStatus: string;
+  occupation: string;
+  mobileNumber: string;
   account?: Account;
   firstName: string;
   lastName: string;
   name?: string;
-  address1: string;
-  city: string;
+  address: string;
+  country: string;
   state: string;
   postalCode: string;
   dateOfBirth: string;
-  ssn: string;
 };
 
 declare type NewUserParams = {
@@ -141,7 +144,7 @@ declare type NewDwollaCustomerParams = {
   lastName: string;
   email: string;
   type: string;
-  address1: string;
+  address: string;
   city: string;
   state: string;
   postalCode: string;

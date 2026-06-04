@@ -57,7 +57,7 @@ const MyBanks = async () => {
           <p className="text-14 text-gray-500">Address</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image src={"./icons/maps.svg"} alt="account" width={15} height={15} className="brightness-[3]"/>
-            <p className="text-gray-500">{loggedIn.address1}</p>
+            <p className="text-gray-500">{loggedIn.address}</p>
           </span>
         </div>
         <div className="flex flex-col gap-1 w-[48%] p-2">
@@ -65,7 +65,7 @@ const MyBanks = async () => {
           <p className="text-14 text-gray-500">Location</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image src={"./icons/globe.svg"} alt="account" width={20} height={20} className="brightness-[3]"/>
-            <p className="text-gray-500">{loggedIn.city}{", "}{loggedIn.state}</p>
+            <p className="text-gray-500">{loggedIn.state}{", "}{loggedIn.country}</p>
           </span>
         </div>
       </div>
