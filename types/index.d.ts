@@ -135,6 +135,12 @@ declare type TransferParams = {
   amount: string;
 };
 
+declare type CreateCardParams = {
+  type: string;
+  avatar: string;
+  identification: string;
+};
+
 declare type AddFundingSourceParams = {
   dwollaCustomerId: string;
   processorToken: string;

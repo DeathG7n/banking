@@ -218,3 +218,36 @@ export async function createAccountNumber() {
     return null;
   }
 }
+
+export async function createCard(cardData: CreateCardParams) {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+  const client = new MongoClient(uri);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+  const id = cookies().get("user-id");
+  try {
+    const user = await users.findOne({
+      _id: new ObjectId(id!.value),
+    });
+    const str = String(user!._id)
+    const accountNumber = str.replace(/\D/g, "").slice(0, 10);
+
+    const account = user!.account
+    account!.card.type = cardData.type
+
+    // await users.findOneAndUpdate(
+    //   { _id: new ObjectId(id!.value) },
+    //   { $set: { account : account } },
+    // );
+
+    return parseStringify(accountNumber);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
