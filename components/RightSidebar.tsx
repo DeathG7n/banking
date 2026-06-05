@@ -8,7 +8,6 @@ import Category from './Category'
 const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
   const categories: CategoryCount[] = countTransactionCategories(transactions);
 
-  console.log(banks.data)
   return (
     <aside className="right-sidebar">
       <section className="flex flex-col pb-8">
@@ -32,17 +31,17 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
       <section className="banks">
         <div className="flex w-full justify-between">
           <h2 className="header-2">My Card</h2>
-          <Link href="/card-application" className="flex gap-2">
+          {!banks?.hasCard && <Link href="/card-application" className="flex gap-2">
             <Image 
               src="/icons/plus.svg"
               width={20}
               height={20}
               alt="plus"
             />
-            {!banks?.hasCard && <h2 className="text-14 font-semibold text-gray-600">
+            <h2 className="text-14 font-semibold text-gray-600">
               Add Card
-            </h2>}
-          </Link>
+            </h2>
+          </Link>}
         </div>
 
         {banks?.hasCard && (

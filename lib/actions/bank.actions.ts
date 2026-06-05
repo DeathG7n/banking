@@ -249,9 +249,6 @@ export async function createCard(cardData: CreateCardParams) {
     account!.card.cvv = Number(cvv)
     account!.card.cardNumber = Number(cardNumber)
     account!.card.mask = cardNumber.slice(-4)
-    
-
-    // continue from here try to create card numbers after researching how card numbers are created
 
     await users.findOneAndUpdate(
       { _id: new ObjectId(id!.value) },

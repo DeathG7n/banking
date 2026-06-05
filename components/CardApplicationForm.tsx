@@ -100,7 +100,10 @@ const CardApplicationForm = () => {
 
       const card = await createCard(cardApplicationParams);
 
-      console.log(card);
+      if (card) {
+        form.reset();
+        router.push("/");
+      }
     } catch (error) {
       console.error(error);
     } finally {

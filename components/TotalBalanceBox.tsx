@@ -1,6 +1,7 @@
 import Image from "next/image";
 import AnimatedCounter from "./AnimatedCounter";
 import DoughnutChart from "./DoughnutChart";
+import Copy from "./Copy"
 
 const TotalBalanceBox = ({ account }: TotalBalanceBoxProps) => {
   return (
@@ -37,6 +38,7 @@ const TotalBalanceBox = ({ account }: TotalBalanceBoxProps) => {
           </h1>
           <h1 className="header-1">{account.accountNumber}</h1>
         </div>
+        <Copy title={String(account.accountNumber)} />
         {/* <div className="flex flex-col border">
           <p className="text-20 text-white text-right font-bold">00:00:00</p>
           <p className="text-12 font-light ">Saturday 30 May 2026</p>

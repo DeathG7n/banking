@@ -43,10 +43,10 @@ const BankCard = ({ data, card, userName, showBalance = true }: CreditCardProps)
             alt="pay"
           />
           <Image 
-            src="/icons/visa.svg"
+            src={card.type === "visa" ? "/icons/visa.svg" : "/icons/mastercard.svg"}
             width={45}
             height={32}
-            alt="mastercard"
+            alt={card.type}
             className="ml-5"
           />
         </div>
