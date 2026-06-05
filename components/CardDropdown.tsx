@@ -16,10 +16,6 @@ export const CardDropdown = ({ setValue, otherStyles }: CardDropdownProps) => {
 
   const cardTypes = [
     {
-      name : "Verve",
-      type : "verve"
-    },
-    {
       name : "Visa",
       type : "visa"
     },

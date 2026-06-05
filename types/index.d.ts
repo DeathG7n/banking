@@ -31,6 +31,8 @@ declare type LoginUser = {
 declare type User = {
   $id?: string;
   email?: string;
+  avatar? : string;
+  identification? : string;
   gender: string;
   maritalStatus: string;
   occupation: string;
@@ -137,8 +139,8 @@ declare type TransferParams = {
 
 declare type CreateCardParams = {
   type: string;
-  avatar: string;
-  identification: string;
+  avatar?: string;
+  identification?: string;
 };
 
 declare type AddFundingSourceParams = {

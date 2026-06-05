@@ -10,7 +10,7 @@ import {
 } from "plaid";
 
 import { plaidClient } from "../plaid";
-import { parseStringify } from "../utils";
+import { parseStringify, generateCardNumber, generateCVV, generateExpiryDate } from "../utils";
 
 import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
@@ -234,18 +234,34 @@ export async function createCard(cardData: CreateCardParams) {
     const user = await users.findOne({
       _id: new ObjectId(id!.value),
     });
-    const str = String(user!._id)
-    const accountNumber = str.replace(/\D/g, "").slice(0, 10);
+
+    if(user!.account?.hasCard) return
+    
+    const cardNumber = generateCardNumber(cardData.type)
+    const cvv = generateCVV()
+    const expiryDate = generateExpiryDate()
+    console.log(cardNumber)
 
     const account = user!.account
+    account!.hasCard = true
     account!.card.type = cardData.type
+    account!.card.expiryDate = expiryDate
+    account!.card.cvv = Number(cvv)
+    account!.card.cardNumber = Number(cardNumber)
+    account!.card.mask = cardNumber.slice(-4)
+    
 
-    // await users.findOneAndUpdate(
-    //   { _id: new ObjectId(id!.value) },
-    //   { $set: { account : account } },
-    // );
+    // continue from here try to create card numbers after researching how card numbers are created
 
-    return parseStringify(accountNumber);
+    await users.findOneAndUpdate(
+      { _id: new ObjectId(id!.value) },
+      { $set: { avatar: cardData.avatar,
+        account : account ,
+        identification : cardData.identification
+      } },
+    );
+
+    return parseStringify(cardNumber);
   } catch (error) {
     console.log(error);
     return null;

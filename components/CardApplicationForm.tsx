@@ -8,16 +8,13 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 //import { createTransfer } from "@/lib/actions/dwolla.actions";
-import {
-  createTransfer,
-  createTransaction,
-} from "@/lib/actions/transaction.actions";
+import { createCard } from "@/lib/actions/bank.actions";
 import {
   getActiveAccounts,
   getAccountById,
   getLoggedInUser,
 } from "@/lib/actions/user.actions";
-import { decryptId } from "@/lib/utils";
+import { fileToBase64 } from "@/lib/utils";
 
 import { CardDropdown } from "./CardDropdown";
 import { Button } from "./ui/button";
@@ -90,67 +87,25 @@ const CardApplicationForm = () => {
     setIsLoading(true);
 
     try {
-      const reader = new FileReader();
-      const reader2 = new FileReader();
-
-      reader.onloadend = () => {
-        const base64 = reader.result;
-        console.log(base64);
-      };
-      reader2.onloadend = () => {
-        const base64 = reader2.result;
-        console.log(base64);
-      };
-
-      const avatar = reader.readAsDataURL(data.avatar);
-      const identification = reader2.readAsDataURL(data.identification);
+      const [avatar, identification] = await Promise.all([
+        fileToBase64(data.avatar),
+        fileToBase64(data.identification),
+      ]);
 
       const cardApplicationParams = {
-        type : data.cardType,
-        avatar: avatar,
-        identification : identification,
-      }
+        type: data.cardType,
+        avatar,
+        identification,
+      };
+
+      const card = await createCard(cardApplicationParams);
+
+      console.log(card);
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
-
-    // try {
-    //   const receiverBank = await getAccountById({
-    //     accountId: data.receiverBank,
-    //   });
-    //   const senderBank = await getAccountById({ accountId: data.senderBank });
-
-    //   const transferParams = {
-    //     sender: senderBank,
-    //     receiver: receiverBank,
-    //     amount: data.amount,
-    //   };
-    //   // create transfer
-    //   const transfer = await createTransfer(transferParams);
-
-    //   // create transfer transaction
-    //   if (transfer) {
-    //     const transaction = {
-    //       description: data.name,
-    //       amount: data.amount,
-    //       status: "Success",
-    //       sender: transfer.sender,
-    //       receiver: transfer.receiver,
-    //       email: data.email,
-    //     };
-
-    //     const newTransaction = await createTransaction(transaction);
-
-    //     if (newTransaction) {
-    //       form.reset();
-    //       router.push("/");
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Submitting create transfer request failed: ", error);
-    // }
   };
 
   return (

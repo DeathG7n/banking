@@ -40,22 +40,22 @@ export const formatDateTime = (dateString: Date) => {
 
   const formattedDateTime: string = new Date(dateString).toLocaleString(
     "en-US",
-    dateTimeOptions
+    dateTimeOptions,
   );
 
   const formattedDateDay: string = new Date(dateString).toLocaleString(
     "en-US",
-    dateDayOptions
+    dateDayOptions,
   );
 
   const formattedDate: string = new Date(dateString).toLocaleString(
     "en-US",
-    dateOptions
+    dateOptions,
   );
 
   const formattedTime: string = new Date(dateString).toLocaleString(
     "en-US",
-    timeOptions
+    timeOptions,
   );
 
   return {
@@ -98,7 +98,7 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
       url: window.location.pathname,
       query: currentUrl,
     },
-    { skipNull: true }
+    { skipNull: true },
   );
 }
 
@@ -131,7 +131,7 @@ export function getAccountTypeColors(type: AccountTypes) {
 }
 
 export function countTransactionCategories(
-  transactions: Transaction[]
+  transactions: Transaction[],
 ): CategoryCount[] {
   const categoryCounts: { [category: string]: number } = {};
   let totalCount = 0;
@@ -160,7 +160,7 @@ export function countTransactionCategories(
       name: category,
       count: categoryCounts[category],
       totalCount,
-    })
+    }),
   );
 
   // Sort the aggregatedCategories array by count in descending order
@@ -195,20 +195,127 @@ export const getTransactionStatus = (date: Date) => {
   return date > twoDaysAgo ? "Processing" : "Success";
 };
 
-export const authFormSchema = (type: string) => z.object({
-  // sign up
-  firstName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  lastName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  address: type === 'sign-in' ? z.string().optional() : z.string().max(50),
-  country: type === 'sign-in' ? z.string().optional() : z.string().max(50),
-  state: type === 'sign-in' ? z.string().optional() : z.string().min(2).max(50),
-  postalCode: type === 'sign-in' ? z.string().optional() : z.string().min(3).max(6),
-  dateOfBirth: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  gender: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  maritalStatus: type === 'sign-in' ? z.string().optional() : z.string().min(6),
-  occupation: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  mobileNumber: type === 'sign-in' ? z.string().optional() : z.string().min(3).max(15),
-  // both
-  email: z.string().email(),
-  password: z.string().min(8),
-})
+export const authFormSchema = (type: string) =>
+  z.object({
+    // sign up
+    firstName: type === "sign-in" ? z.string().optional() : z.string().min(3),
+    lastName: type === "sign-in" ? z.string().optional() : z.string().min(3),
+    address: type === "sign-in" ? z.string().optional() : z.string().max(50),
+    country: type === "sign-in" ? z.string().optional() : z.string().max(50),
+    state:
+      type === "sign-in" ? z.string().optional() : z.string().min(2).max(50),
+    postalCode:
+      type === "sign-in" ? z.string().optional() : z.string().min(3).max(6),
+    dateOfBirth: type === "sign-in" ? z.string().optional() : z.string().min(3),
+    gender: type === "sign-in" ? z.string().optional() : z.string().min(3),
+    maritalStatus:
+      type === "sign-in" ? z.string().optional() : z.string().min(6),
+    occupation: type === "sign-in" ? z.string().optional() : z.string().min(3),
+    mobileNumber:
+      type === "sign-in" ? z.string().optional() : z.string().min(3).max(15),
+    // both
+    email: z.string().email(),
+    password: z.string().min(8),
+  });
+
+export function generateCardNumber(network: string) {
+  let cardNumber = [];
+
+  // 1. Establish network prefixes (IIN) and lengths
+  if (network.toLowerCase() === "visa") {
+    cardNumber.push(4); // Visa starts with 4
+  } else if (network.toLowerCase() === "mastercard") {
+    // MasterCard starts with 51-55
+    const prefixes = [51, 52, 53, 54, 55];
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    cardNumber.push(...randomPrefix.toString().split("").map(Number));
+  } else {
+    throw new Error("Unsupported network. Use 'visa' or 'mastercard'.");
+  }
+
+  // 2. Generate random digits up to length 15 (leaving the 16th for the checksum)
+  while (cardNumber.length < 15) {
+    cardNumber.push(Math.floor(Math.random() * 10));
+  }
+
+  // 3. Compute the Luhn Checksum Digit
+  let sum = 0;
+  for (let i = 0; i < cardNumber.length; i++) {
+    let digit = cardNumber[i];
+
+    // Multiply every second digit from the right by 2
+    // Since we are moving left-to-right on a 15-digit array, even indices get doubled
+    if (i % 2 === 0) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9; // Same as adding digits together (e.g., 14 -> 1+4=5)
+      }
+    }
+    sum += digit;
+  }
+
+  // The final digit must bring the total sum to a multiple of 10
+  const checkDigit = (10 - (sum % 10)) % 10;
+  cardNumber.push(checkDigit);
+
+  return cardNumber.join("");
+}
+
+export function generateCVV() {
+  // Generate a random integer between 0 and 999 and pad with leading zeros
+  const cvv = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0");
+  return cvv;
+}
+
+export function generateExpiryDate() {
+  const date = new Date();
+  // Add years to the current year
+  date.setFullYear(date.getFullYear() + 3);
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  // Get the last two digits of the year
+  const year = String(date.getFullYear()).slice(-2);
+
+  return `${month}/${year}`;
+}
+
+export function validateExpiryDate(expiryStr: string) {
+  // Regex to match MM/YY format
+  if (!/^\d{2}\/\d{2}$/.test(expiryStr)) return false;
+
+  const [inputMonth, inputYear] = expiryStr.split("/").map(Number);
+
+  // Convert 2-digit year to 4-digit (e.g., 29 to 2029)
+  const currentFullYear = new Date().getFullYear();
+  const currentCentury = Math.floor(currentFullYear / 100) * 100;
+  const inputFullYear = currentCentury + inputYear;
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  // Check if the date is in the past
+  if (inputFullYear < currentYear) return false;
+  if (inputFullYear === currentYear && inputMonth < currentMonth) return false;
+
+  // Check for valid month (1-12)
+  if (inputMonth < 1 || inputMonth > 12) return false;
+
+  return true;
+}
+
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+  });
+};
