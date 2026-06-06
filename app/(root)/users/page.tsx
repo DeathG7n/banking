@@ -2,16 +2,20 @@ import HeaderBox from "@/components/HeaderBox";
 import { Pagination } from "@/components/Pagination";
 import TransactionsTable from "@/components/TransactionsTable";
 import { getAccount, getAccounts } from "@/lib/actions/bank.actions";
-import { getLoggedInUser } from "@/lib/actions/user.actions";
-import { formatAmount } from "@/lib/utils";
+import { getLoggedInUser, getUsers } from "@/lib/actions/user.actions";
+import { cn, formatAmount } from "@/lib/utils";
+import Link from "next/link";
 import React from "react";
 
-const TransactionHistory = async ({
-  searchParams: { id, page },
-}: SearchParamProps) => {
+const Users = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
+  const users = await getUsers();
   const loggedIn = await getLoggedInUser();
+
+  //if(!loggedIn.admin) return
+
   const account = loggedIn.account;
+  console.log(users);
 
   const rowsPerPage = 10;
   const totalPages = Math.ceil(account?.transactions.length / rowsPerPage);
@@ -26,10 +30,7 @@ const TransactionHistory = async ({
   return (
     <div className="transactions">
       <div className="transactions-header">
-        <HeaderBox
-          title="Transaction History"
-          subtext="See your bank details and transactions."
-        />
+        <HeaderBox title="Users" subtext="See all active users" />
       </div>
 
       <div className="space-y-6">
@@ -53,16 +54,18 @@ const TransactionHistory = async ({
         </div>
 
         <section className="flex w-full flex-col gap-6">
-          <TransactionsTable transactions={currentTransactions} />
-          {totalPages > 1 && (
-            <div className="my-4 w-full">
-              <Pagination totalPages={totalPages} page={currentPage} />
-            </div>
-          )}
+          {users.map((user: User) => {
+            return (
+              <Link href={`/profile/${user.email}`} key={user.email} className="">
+                {" "}
+                {user.firstName}
+              </Link>
+            );
+          })}
         </section>
       </div>
     </div>
   );
 };
 
-export default TransactionHistory;
+export default Users;

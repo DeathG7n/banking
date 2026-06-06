@@ -1,11 +1,18 @@
+"use client"
+
 import BankCard from "@/components/BankCard";
 import HeaderBox from "@/components/HeaderBox";
 import { getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 const Profile = async () => {
+  const segments = usePathname().split("/").filter(Boolean);
+
+  console.log(segments);
+  // ["dashboard", "profile"]
   const loggedIn = await getLoggedInUser();
 
   return (

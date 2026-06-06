@@ -326,3 +326,17 @@ export const getAccountById = async ({
     return null;
   }
 };
+
+export const getUsers = async () => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = await db.collection('users').find({}).toArray()
+  try {
+    return parseStringify(users);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};

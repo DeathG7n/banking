@@ -32,6 +32,7 @@ declare type User = {
   $id?: string;
   email?: string;
   avatar? : string;
+  admin?: boolean;
   identification? : string;
   gender: string;
   maritalStatus: string;
