@@ -10,7 +10,12 @@ import {
 } from "plaid";
 
 import { plaidClient } from "../plaid";
-import { parseStringify, generateCardNumber, generateCVV, generateExpiryDate } from "../utils";
+import {
+  parseStringify,
+  generateCardNumber,
+  generateCVV,
+  generateExpiryDate,
+} from "../utils";
 
 import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
@@ -51,7 +56,7 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
         };
 
         return account;
-      })
+      }),
     );
 
     const totalBanks = accounts.length;
@@ -91,7 +96,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
         paymentChannel: transferData.channel,
         category: transferData.category,
         type: transferData.senderBankId === bank.$id ? "debit" : "credit",
-      })
+      }),
     );
 
     // get institution info from plaid
@@ -117,8 +122,8 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     };
 
     // sort transactions by date such that the most recent transaction is first
-      const allTransactions = [...transactions, ...transferTransactions].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    const allTransactions = [...transactions, ...transferTransactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
 
     return parseStringify({
@@ -201,15 +206,15 @@ export async function createAccountNumber() {
     const user = await users.findOne({
       _id: new ObjectId(id!.value),
     });
-    const str = String(user!._id)
+    const str = String(user!._id);
     const accountNumber = str.replace(/\D/g, "").slice(0, 10);
 
-    const account = user!.account
-    account!.data.accountNumber = Number(accountNumber)
+    const account = user!.account;
+    account!.data.accountNumber = Number(accountNumber);
 
     await users.findOneAndUpdate(
       { _id: new ObjectId(id!.value) },
-      { $set: { account : account } },
+      { $set: { account: account } },
     );
 
     return parseStringify(accountNumber);
@@ -235,27 +240,30 @@ export async function createCard(cardData: CreateCardParams) {
       _id: new ObjectId(id!.value),
     });
 
-    if(user!.account?.hasCard) return
-    
-    const cardNumber = generateCardNumber(cardData.type)
-    const cvv = generateCVV()
-    const expiryDate = generateExpiryDate()
-    console.log(cardNumber)
+    if (user!.account?.hasCard) return;
 
-    const account = user!.account
-    account!.hasCard = true
-    account!.card.type = cardData.type
-    account!.card.expiryDate = expiryDate
-    account!.card.cvv = Number(cvv)
-    account!.card.cardNumber = Number(cardNumber)
-    account!.card.mask = cardNumber.slice(-4)
+    const cardNumber = generateCardNumber(cardData.type);
+    const cvv = generateCVV();
+    const expiryDate = generateExpiryDate();
+    console.log(cardNumber);
+
+    const account = user!.account;
+    account!.hasCard = true;
+    account!.card.type = cardData.type;
+    account!.card.expiryDate = expiryDate;
+    account!.card.cvv = Number(cvv);
+    account!.card.cardNumber = Number(cardNumber);
+    account!.card.mask = cardNumber.slice(-4);
 
     await users.findOneAndUpdate(
       { _id: new ObjectId(id!.value) },
-      { $set: { avatar: cardData.avatar,
-        account : account ,
-        identification : cardData.identification
-      } },
+      {
+        $set: {
+          avatar: cardData.avatar,
+          account: account,
+          identification: cardData.identification,
+        },
+      },
     );
 
     return parseStringify(cardNumber);

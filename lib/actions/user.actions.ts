@@ -39,7 +39,6 @@ const {
 //   }
 // };
 
-
 export const signIn = async ({ email, password }: signInProps) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
@@ -148,12 +147,12 @@ export async function getActiveAccounts() {
   const client = new MongoClient(uri!);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection('users').find({}).toArray()
+  const users = await db.collection("users").find({}).toArray();
   try {
-    let accounts = []
+    let accounts = [];
     for (let i = 0; i < users.length; i++) {
-      const account = users[i].account
-      accounts.push(String(account.data.accountNumber))
+      const account = users[i].account;
+      accounts.push(String(account.data.accountNumber));
     }
     return parseStringify(accounts);
   } catch (error) {
@@ -161,7 +160,6 @@ export async function getActiveAccounts() {
     return null;
   }
 }
-
 
 // export const createLinkToken = async (user: User) => {
 //   try {
@@ -309,18 +307,15 @@ export async function getActiveAccounts() {
 //   }
 // };
 
-export const getAccountById = async ({
-  accountId,
-}: getAccountByIdProps) => {
+export const getAccountById = async ({ accountId }: getAccountByIdProps) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection('users').find({}).toArray()
+  const users = await db.collection("users").find({}).toArray();
   try {
-    const account = users.find(user => user?.account?.data?.accountNumber === accountId)
-    console.log(account)
-    return parseStringify(account!.account);
+    const user = users.find(user => user?.account?.data?.accountNumber === Number(accountId))
+    return parseStringify(user!.account);
   } catch (error) {
     console.log(error);
     return null;
@@ -332,9 +327,24 @@ export const getUsers = async () => {
   const client = new MongoClient(uri!);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection('users').find({}).toArray()
+  const users = await db.collection("users").find({}).toArray();
   try {
     return parseStringify(users);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+export const getUserByEmail = async ({ accountId }: getAccountByIdProps) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = await db.collection("users").find({}).toArray();
+  try {
+    const user = users.find(user => user?.account?.data?.accountNumber === Number(accountId))
+    return parseStringify(user);
   } catch (error) {
     console.log(error);
     return null;

@@ -86,7 +86,7 @@ declare type Data = {
 declare type Transaction = {
   id: string;
   $id: string;
-  name: string;
+  description: string;
   paymentChannel: string;
   type: string;
   accountId: string;
@@ -96,7 +96,7 @@ declare type Transaction = {
   date: string;
   image: string;
   type: string;
-  $createdAt: string;
+  createdAt: string;
   channel: string;
   senderBankId: string;
   receiverBankId: string;
@@ -356,4 +356,8 @@ declare interface getBankProps {
 
 declare interface getAccountByIdProps {
   accountId: string;
+}
+
+declare interface getUserByEmailProps {
+  email: string;
 }

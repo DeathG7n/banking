@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm , useWatch } from "react-hook-form";
 import * as z from "zod";
 
 //import { createTransfer } from "@/lib/actions/dwolla.actions";
@@ -16,6 +16,7 @@ import {
   getActiveAccounts,
   getAccountById,
   getLoggedInUser,
+  getUsers,
 } from "@/lib/actions/user.actions";
 import { decryptId } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ import { Textarea } from "./ui/textarea";
 import { TransferLedgerSweepSimulateEventType } from "plaid";
 
 let activeAccounts: string[] = [];
+let users: User[] = [];
 let user: User;
 
 const formSchema = z
@@ -63,20 +65,25 @@ const formSchema = z
 const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [recipient, setRecipient] = useState<Data | null>(null);
+  const [recipient, setRecipient] = useState<string>();
 
-  
+  useEffect(() => {
+    const getAccounts = async () => {
+      user = await getLoggedInUser();
+      activeAccounts = await getActiveAccounts();
+      users = await getUsers();
+    };
 
-  const getAccounts = async () => {
-    user = await getLoggedInUser()
-    activeAccounts = await getActiveAccounts();
-  };
-  getAccounts();
+    getAccounts();
+  }, []);
 
   const change = async (e: any) => {
-    const receiverBank = await getAccountById({ accountId: e.target.value });
+    const receiverBank = users.find(
+      (user) => user?.account?.data?.accountNumber === Number(e.target.value),
+    );
+    console.log(receiverBank);
     if (receiverBank) {
-      setRecipient(receiverBank.data);
+      setRecipient(receiverBank!.account?.data.name);
     }
   };
 
@@ -132,6 +139,20 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
 
     setIsLoading(false);
   };
+
+  const receiverBankValue = useWatch({
+    control: form.control,
+    name: "receiverBank",
+  });
+
+  useEffect(() => {
+    const receiver = users.find(
+      (user) =>
+        user?.account?.data?.accountNumber === Number(receiverBankValue),
+    );
+
+    setRecipient(receiver?.account?.data?.name);
+  }, [receiverBankValue]);
 
   return (
     <Form {...form}>
@@ -243,12 +264,11 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
                       placeholder="Enter the recipient's account number"
                       className="input-class"
                       {...field}
-                      onChange={(e) => change(e)}
                     />
                   </FormControl>
                   <FormMessage className="text-12 text-red-500" />
                   {recipient && (
-                    <p className="text-12 text-blue-500">{recipient!.name}</p>
+                    <p className="text-12 text-blue-500">{recipient}</p>
                   )}
                 </div>
               </div>
