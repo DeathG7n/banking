@@ -1,9 +1,31 @@
+"use client";
+
 import Image from "next/image";
 import AnimatedCounter from "./AnimatedCounter";
 import DoughnutChart from "./DoughnutChart";
-import Copy from "./Copy"
+import Copy from "./Copy";
+import { useEffect, useState } from "react";
 
 const TotalBalanceBox = ({ account }: TotalBalanceBoxProps) => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const formattedTime = time.toLocaleTimeString("en-GB", {
+    hour12: false,
+  });
+  const formattedDate = time.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   return (
     <section className="total-balance">
       <div className="flex justify-between gap-6">
@@ -17,8 +39,18 @@ const TotalBalanceBox = ({ account }: TotalBalanceBoxProps) => {
           </div>
         </div>
         <div className="flex flex-col">
-          <p className="text-20 text-white text-right font-bold">00:00:00</p>
-          <p className="text-12 font-light ">Saturday 30 May 2026</p>
+          <span
+            className="text-20 text-white text-right font-bold"
+            suppressHydrationWarning
+          >
+            {formattedTime}
+          </span>
+          <span
+            className="text-12 font-light font-bold"
+            suppressHydrationWarning
+          >
+            {formattedDate}
+          </span>
         </div>
       </div>
       <div className="flex flex-col gap-1">

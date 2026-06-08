@@ -77,16 +77,6 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
     getAccounts();
   }, []);
 
-  const change = async (e: any) => {
-    const receiverBank = users.find(
-      (user) => user?.account?.data?.accountNumber === Number(e.target.value),
-    );
-    console.log(receiverBank);
-    if (receiverBank) {
-      setRecipient(receiverBank!.account?.data.name);
-    }
-  };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -268,7 +258,7 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
                   </FormControl>
                   <FormMessage className="text-12 text-red-500" />
                   {recipient && (
-                    <p className="text-12 text-blue-500">{recipient}</p>
+                    <p className="text-14 text-green-500 mt-1">{recipient}</p>
                   )}
                 </div>
               </div>

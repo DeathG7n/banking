@@ -2,13 +2,14 @@ import HeaderBox from "@/components/HeaderBox";
 import { getLoggedInUser, getUsers } from "@/lib/actions/user.actions";
 import { formatAmount } from "@/lib/utils";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import React from "react";
 
 const Users = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const users = await getUsers();
   const loggedIn = await getLoggedInUser();
 
-  //if(!loggedIn.admin) return
+  if(!loggedIn.admin) redirect("/")
 
   const account = loggedIn.account;
   return (
@@ -42,7 +43,7 @@ const Users = async ({ searchParams: { id, page } }: SearchParamProps) => {
             return (
               <Link href={`/profile/${user?.account?.data?.accountNumber}`} key={user.email} className="">
                 {" "}
-                {user.firstName}
+                {user.email}
               </Link>
             );
           })}

@@ -40,7 +40,6 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
           <TableHead className="px-2">Amount</TableHead>
           <TableHead className="px-2">Status</TableHead>
           <TableHead className="px-2">Date</TableHead>
-          <TableHead className="px-2 max-md:hidden">Channel</TableHead>
           <TableHead className="px-2 max-md:hidden">Category</TableHead>
         </TableRow>
       </TableHeader>
@@ -54,7 +53,7 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
 
           return (
             <TableRow
-              key={t.id}
+              key={t.createdAt}
               className={`${isDebit || amount[0] === "-" ? "bg-[#FFFBFA]" : "bg-[#F6FEF9]"} !over:bg-none !border-b-DEFAULT`}
             >
               <TableCell className="max-w-[250px] pl-2 pr-10">
@@ -80,11 +79,7 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
               </TableCell>
 
               <TableCell className="min-w-32 pl-2 pr-10">
-                {formatDateTime(new Date(t.createdAt)).dateTime}
-              </TableCell>
-
-              <TableCell className="pl-2 pr-10 capitalize min-w-24">
-                {t.paymentChannel}
+                {formatDateTime(new Date(t.createdAt)).dateOnly}
               </TableCell>
 
               <TableCell className="pl-2 pr-10 max-md:hidden">

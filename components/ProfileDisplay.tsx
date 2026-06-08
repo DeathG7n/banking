@@ -9,9 +9,9 @@ import UpdateInput from "./UpdateInput";
 
 const ProfileDisplay = ({ user }: { user: User }) => {
   const [amount, setAmount] = useState(0);
+  const [loading, setLoading] = useState(false)
   const change = (e: any) => {
     setAmount(e.target.value);
-    console.log(e.target.value);
   };
   return (
     <section className="flex flex-col pb-5">
@@ -31,7 +31,9 @@ const ProfileDisplay = ({ user }: { user: User }) => {
         </div>
       </div>
       <div className="px-6 pt-10 mt-5">
-        <h1 className="header-4">Profile Information</h1>
+        <h1 className="header-4 text-xl md:text-2xl lg:text-3xl">
+          Profile Information
+        </h1>
         <p>Your personal information and account details</p>
       </div>
       <div className="px-6 mt-5 flex flex-col gap-2">
@@ -41,11 +43,13 @@ const ProfileDisplay = ({ user }: { user: User }) => {
           change={change}
           amount={amount}
           email={user?.email}
+          account={user?.account?.data?.accountNumber}
+          loading={loading}
+          setLoading={setLoading}
         />
       </div>
       <div className="flex flex-wrap px-6 justify-between">
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">First Name</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -58,8 +62,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.firstName}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Last Name</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -72,8 +75,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.lastName}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Mobile Number</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -86,8 +88,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.mobileNumber}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Gender</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -100,8 +101,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.gender}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Email</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -114,8 +114,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.email}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Date Of Birth</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -128,8 +127,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.dateOfBirth}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Address</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image
@@ -142,8 +140,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             <p className="text-gray-500">{user?.address}</p>
           </span>
         </div>
-        <div className="flex flex-col gap-1 w-[48%] p-2">
-          <div className="relative size-4"></div>
+        <div className="flex flex-col gap-1 w-full md:w-[48%] p-2">
           <p className="text-14 text-gray-500">Location</p>
           <span className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100">
             <Image

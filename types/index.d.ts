@@ -100,6 +100,8 @@ declare type Transaction = {
   channel: string;
   senderBankId: string;
   receiverBankId: string;
+  sender: User;
+  receiver: User;
 };
 
 declare type Bank = {
