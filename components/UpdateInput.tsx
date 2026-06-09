@@ -17,29 +17,37 @@ const UpdateInput = ({
   account,
   loading,
   setLoading,
+  router,
 }: any) => {
   const submit = async () => {
-    setLoading(true);
-    const update = await updateBalance({ amount, email });
-    // create transfer transaction
-    if (update) {
-      const sender = await getLoggedInUser();
-      const transaction = {
-        description: "Deposit",
-        amount: amount,
-        status: "Success",
-        sender: sender,
-        receiver: update,
-        email: email,
-      };
+    try {
+      setLoading(true);
 
-      const newTransaction = await createTransaction(transaction);
+      const update = await updateBalance({ amount, email });
 
-      if (newTransaction) {
-        redirect(`/profile/${account}`);
+      if (update) {
+        const sender = await getLoggedInUser();
+
+        const transactionAmount = Number(amount) - Number(balance)
+
+        const transaction = {
+          description: "Deposit",
+          amount : String(transactionAmount),
+          status: "Success",
+          sender,
+          receiver: update,
+          email,
+        };
+
+        const newTransaction = await createTransaction(transaction);
+
+        if (newTransaction) {
+          router.refresh();
+        }
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   return (
     <div className="flex gap-2 content-center">

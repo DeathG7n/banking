@@ -21,7 +21,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           />
 
           <TotalBalanceBox
-            account={account.data}
+            user={loggedIn}
           />
         </header>
 

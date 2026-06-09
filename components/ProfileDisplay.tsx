@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AnimatedCounter from "./AnimatedCounter";
 import UpdateInput from "./UpdateInput";
+import { useRouter } from "next/navigation";
 
 const ProfileDisplay = ({ user }: { user: User }) => {
+  const router = useRouter()
   const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(false)
   const change = (e: any) => {
@@ -46,6 +48,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
           account={user?.account?.data?.accountNumber}
           loading={loading}
           setLoading={setLoading}
+          router={router}
         />
       </div>
       <div className="flex flex-wrap px-6 justify-between">

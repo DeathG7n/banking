@@ -238,7 +238,7 @@ declare interface BankTabItemProps {
 }
 
 declare interface TotalBalanceBoxProps {
-  account: Data;
+  user: User;
 }
 
 declare interface FooterProps {

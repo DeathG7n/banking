@@ -36,8 +36,8 @@ export const createTransaction = async (
       description: transaction.description,
       amount: transaction.amount,
       status: "Processed",
-      sender: transaction.sender,
-      receiver: transaction.receiver,
+      sender: transaction.sender?.account?.data.accountNumber,
+      receiver: transaction.receiver?.account?.data.accountNumber,
       email: transaction.email,
       createdAt: new Date(),
       category: "Debit",
@@ -47,8 +47,8 @@ export const createTransaction = async (
       description: transaction.description,
       amount: transaction.amount,
       status: "Processed",
-      sender: transaction.sender,
-      receiver: transaction.receiver,
+      sender: transaction.sender?.account?.data.accountNumber,
+      receiver: transaction.receiver?.account?.data.accountNumber,
       email: transaction.email,
       createdAt: new Date(),
       category: "Credit",
@@ -74,7 +74,7 @@ export const createTransaction = async (
       );
     const transactions = {
       sender: senderTransaction,
-      receiver: receiverTransactions,
+      receiver: receiverTransaction,
     };
     return parseStringify(transactions);
   } catch (error) {

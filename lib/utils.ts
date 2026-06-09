@@ -308,14 +308,50 @@ export function validateExpiryDate(expiryStr: string) {
 
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Only image files are supported"));
+      return;
+    }
+
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      resolve(reader.result as string);
+    reader.onload = (e) => {
+      const img = new Image();
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+
+        const MAX_WIDTH = 800;
+        let { width, height } = img;
+
+        if (width > MAX_WIDTH) {
+          const ratio = MAX_WIDTH / width;
+          width = MAX_WIDTH;
+          height *= ratio;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to WebP at 70% quality
+        const compressedBase64 = canvas.toDataURL("image/webp", 0.7);
+
+        resolve(compressedBase64);
+      };
+
+      img.onerror = reject;
+      img.src = e.target?.result as string;
     };
 
     reader.onerror = reject;
-
     reader.readAsDataURL(file);
   });
 };
