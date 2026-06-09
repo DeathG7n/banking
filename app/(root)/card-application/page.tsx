@@ -1,6 +1,5 @@
 import HeaderBox from '@/components/HeaderBox'
 import CardApplicationForm from '@/components/CardApplicationForm'
-import { getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 import React from 'react'
 

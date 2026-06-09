@@ -1,6 +1,3 @@
-import BankCard from "@/components/BankCard";
-import HeaderBox from "@/components/HeaderBox";
-import { getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import React from "react";
