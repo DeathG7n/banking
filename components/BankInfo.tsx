@@ -16,20 +16,20 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
 
   const isActive = appwriteItemId === account?.appwriteItemId;
 
-  const handleBankChange = () => {
-    const newUrl = formUrlQuery({
-      params: searchParams.toString(),
-      key: "id",
-      value: "account?.appwriteItemId",
-    });
-    router.push(newUrl, { scroll: false });
-  };
+  // const handleBankChange = () => {
+  //   const newUrl = formUrlQuery({
+  //     params: searchParams.toString(),
+  //     key: "id",
+  //     value: "account?.appwriteItemId",
+  //   });
+  //   router.push(newUrl, { scroll: false });
+  // };
 
   const colors = getAccountTypeColors(account?.data.type as AccountTypes);
 
   return (
     <div
-      onClick={handleBankChange}
+      // onClick={handleBankChange}
       className={cn(`bank-info ${colors.bg}`, {
         "shadow-sm border-blue-700": type === "card" && isActive,
         "rounded-xl": type === "card",
