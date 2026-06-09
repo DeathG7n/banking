@@ -54,35 +54,35 @@ const MobileNav = ({ user }: MobileNavProps) => {
               Horizon
             </h1>
           </Link>
-          <div className="mobilenav-sheet">
+          <div className="mobilenav-sheet pb-4">
             <SheetClose asChild>
               <nav className="flex h-full flex-col gap-6 pt-16 text-white">
                 {user.admin && (
                   <SheetClose asChild>
                     <Link
-                        href={admin.route}
-                        key={admin.label}
-                        className={cn("mobilenav-sheet_close w-full", {
-                          "bg-bank-gradient": isActiveForAdmin,
+                      href={admin.route}
+                      key={admin.label}
+                      className={cn("mobilenav-sheet_close w-full", {
+                        "bg-bank-gradient": isActiveForAdmin,
+                      })}
+                    >
+                      <Image
+                        src={admin.imgURL}
+                        alt={admin.label}
+                        width={20}
+                        height={20}
+                        className={cn({
+                          "brightness-[3] invert-0": isActiveForAdmin,
+                        })}
+                      />
+                      <p
+                        className={cn("text-16 font-semibold text-black-2", {
+                          "text-white": isActiveForAdmin,
                         })}
                       >
-                        <Image
-                          src={admin.imgURL}
-                          alt={admin.label}
-                          width={20}
-                          height={20}
-                          className={cn({
-                            "brightness-[3] invert-0": isActiveForAdmin,
-                          })}
-                        />
-                        <p
-                          className={cn("text-16 font-semibold text-black-2", {
-                            "text-white": isActiveForAdmin,
-                          })}
-                        >
-                          {admin.label}
-                        </p>
-                      </Link>
+                        {admin.label}
+                      </p>
+                    </Link>
                   </SheetClose>
                 )}
                 {sidebarLinks.map((item) => {
