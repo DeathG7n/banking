@@ -20,12 +20,12 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       key: "id",
-      value: account?.appwriteItemId,
+      value: "account?.appwriteItemId",
     });
     router.push(newUrl, { scroll: false });
   };
 
-  const colors = getAccountTypeColors(account?.type as AccountTypes);
+  const colors = getAccountTypeColors(account?.data.type as AccountTypes);
 
   return (
     <div
@@ -43,7 +43,7 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
           src="/icons/connect-bank.svg"
           width={20}
           height={20}
-          alt={account.subtype}
+          alt=""
           className="m-2 min-w-5"
         />
       </figure>
@@ -52,7 +52,7 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
           <h2
             className={`text-16 line-clamp-1 flex-1 font-bold text-blue-900 ${colors.title}`}
           >
-            {account.name}
+            {account.data.name}
           </h2>
           {type === "full" && (
             <p
@@ -64,7 +64,7 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
         </div>
 
         <p className={`text-16 font-medium text-blue-700 ${colors.subText}`}>
-          {formatAmount(account.currentBalance)}
+          {formatAmount(account.data.currentBalance)}
         </p>
       </div>
     </div>

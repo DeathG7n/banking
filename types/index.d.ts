@@ -31,9 +31,9 @@ declare type LoginUser = {
 declare type User = {
   $id?: string;
   email?: string;
-  avatar? : string;
+  avatar?: string;
   admin?: boolean;
-  identification? : string;
+  identification?: string;
   gender: string;
   maritalStatus: string;
   occupation: string;
@@ -71,6 +71,8 @@ declare type Account = {
   card: Card;
   hasCard: boolean;
   transactions: Transaction[];
+  appwriteItemId?: string;
+  subtype?: string;
 };
 
 declare type Data = {
