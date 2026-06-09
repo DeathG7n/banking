@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import AnimatedCounter from "./AnimatedCounter";
-import DoughnutChart from "./DoughnutChart";
 import Copy from "./Copy";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";

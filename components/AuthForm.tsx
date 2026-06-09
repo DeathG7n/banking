@@ -22,8 +22,7 @@ import CustomInput from "./CustomInput";
 import { authFormSchema } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
-import PlaidLink from "./PlaidLink";
+import { signIn, signUp } from "@/lib/actions/user.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
@@ -133,9 +132,7 @@ const AuthForm = ({ type }: { type: string }) => {
         </div>
       </header>
       {user ? (
-        <div className="flex flex-col gap-4">
-          <PlaidLink user={user} variant="primary" />
-        </div>
+        <div className="flex flex-col gap-4"></div>
       ) : (
         <>
           <Form {...form}>

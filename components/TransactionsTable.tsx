@@ -13,7 +13,6 @@ import {
   formatAmount,
   formatDateTime,
   getTransactionStatus,
-  removeSpecialCharacters,
 } from "@/lib/utils";
 
 const CategoryBadge = ({ category }: CategoryBadgeProps) => {

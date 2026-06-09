@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import AnimatedCounter from "./AnimatedCounter";
 import UpdateInput from "./UpdateInput";
 import { useRouter } from "next/navigation";
 
