@@ -13,15 +13,14 @@ import {
 } from "@/components/ui/select";
 
 export const CardDropdown = ({ setValue, otherStyles }: CardDropdownProps) => {
-
   const cardTypes = [
     {
-      name : "Visa",
-      type : "visa"
+      name: "Visa",
+      type: "visa",
     },
     {
-      name : "Mastercard",
-      type : "mastercard"
+      name: "Mastercard",
+      type: "mastercard",
     },
   ];
 
@@ -57,6 +56,7 @@ export const CardDropdown = ({ setValue, otherStyles }: CardDropdownProps) => {
           {cardTypes.map((type) => {
             return (
               <SelectItem
+                key={type.name}
                 value={type.type}
                 className="cursor-pointer border-t"
               >
