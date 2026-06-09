@@ -9,11 +9,21 @@ import { Button } from "./ui/button";
 
 const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
   const [time, setTime] = useState(new Date());
+  const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(new Date());
     }, 1000);
+    const hour = time.getHours();
+
+    if (hour < 12) {
+      setGreeting("Good morning ☀️");
+    } else if (hour < 18) {
+      setGreeting("Good afternoon 🌤️");
+    } else {
+      setGreeting("Good evening 🌙");
+    }
 
     return () => clearInterval(interval);
   }, []);
@@ -44,8 +54,8 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
               height={100}
             />
           </div>
-          <div>
-            <h1 className="text-16 text-gray-700">Good afternoon</h1>
+          <div className="w-fit">
+            <h1 className="text-10 lg:text-16 text-gray-700">{greeting}</h1>
             <h1 className="header-1">{user?.account?.data.firstName}</h1>
           </div>
         </div>
@@ -57,7 +67,7 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
             {formattedTime}
           </span>
           <span
-            className="text-12 font-light font-bold"
+            className="text-10 lg:text-12 font-light text-right font-bold"
             suppressHydrationWarning
           >
             {formattedDate}

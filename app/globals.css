@@ -360,7 +360,7 @@
   }
 
   .footer_name-mobile {
-    @apply flex size-6 items-center justify-center rounded-full bg-gray-200;
+    @apply flex size-2 items-center justify-center rounded-full bg-gray-200;
   }
 
   .footer_email-mobile {

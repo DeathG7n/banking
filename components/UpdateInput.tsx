@@ -50,7 +50,7 @@ const UpdateInput = ({
     }
   };
   return (
-    <div className="flex gap-2 content-center">
+    <div className="flex flex-col lg:flex-row gap-2 content-center">
       <input
         type="number"
         className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100"

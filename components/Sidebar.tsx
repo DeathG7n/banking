@@ -33,25 +33,33 @@ const Sidebar = ({ user }: SiderbarProps) => {
           <h1 className="sidebar-logo">Horizon</h1>
         </Link>
 
-        {user.admin && <Link
-          href={admin.route}
-          key={admin.label}
-          className={cn("sidebar-link", { "bg-bank-green-gradient": isActiveForAdmin })}
-        >
-          <div className="relative size-4">
-            <Image
-              src={admin.imgURL}
-              alt={admin.label}
-              fill
-              className={cn({
-                "brightness-[3] invert-0": isActiveForAdmin,
+        {user.admin && (
+          <Link
+            href={admin.route}
+            key={admin.label}
+            className={cn("sidebar-link", {
+              "bg-bank-green-gradient": isActiveForAdmin,
+            })}
+          >
+            <div className="relative size-4">
+              <Image
+                src={admin.imgURL}
+                alt={admin.label}
+                fill
+                className={cn({
+                  "brightness-[3] invert-0": isActiveForAdmin,
+                })}
+              />
+            </div>
+            <p
+              className={cn("sidebar-label", {
+                "!text-white": isActiveForAdmin,
               })}
-            />
-          </div>
-          <p className={cn("sidebar-label", { "!text-white": isActiveForAdmin })}>
-            {admin.label}
-          </p>
-        </Link>}
+            >
+              {admin.label}
+            </p>
+          </Link>
+        )}
         {sidebarLinks.map((item) => {
           const isActive =
             pathname === item.route || pathname.startsWith(`${item.route}/`);
