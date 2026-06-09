@@ -24,19 +24,19 @@ const BankCard = ({
             </p>
           </div>
 
-          <article className="flex flex-col gap-2">
+          <article className="flex flex-col gap-2 relative">
             <div className="flex justify-between">
               <h1 className="text-12 font-semibold text-white">{userName}</h1>
               <h2 className="text-12 font-semibold text-white">
                 {card?.expiryDate}
               </h2>
             </div>
-            <p className="text-14 font-semibold tracking-[1.1px] text-white relative">
+            <p className="text-14 font-semibold tracking-[1.1px] text-white ">
               ●●●● ●●●● ●●●● <span className="text-16">{card?.mask}</span>
-              <div className="absolute top-[-25px] right-0 lg:right-[-45px]">
-                <Copy title={String(card?.cardNumber)} />
-              </div>
             </p>
+            <div className="absolute bottom-[-5px] right-0 lg:right-[-40px]">
+              <Copy title={String(card?.cardNumber)} />
+            </div>
           </article>
         </div>
 
