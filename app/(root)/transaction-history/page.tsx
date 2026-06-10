@@ -13,12 +13,12 @@ const TransactionHistory = async ({
   const account = loggedIn.account;
 
   const rowsPerPage = 10;
-  const totalPages = Math.ceil(account?.transactions.length / rowsPerPage);
+  const totalPages = Math.ceil(account?.transactions?.length / rowsPerPage);
 
   const indexOfLastTransaction = currentPage * rowsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - rowsPerPage;
 
-  const currentTransactions = account?.transactions.slice(
+  const currentTransactions = account?.transactions?.slice(
     indexOfFirstTransaction,
     indexOfLastTransaction,
   );

@@ -5,7 +5,6 @@ import {
   createTransaction,
   updateBalance,
 } from "@/lib/actions/transaction.actions";
-import { redirect } from "next/navigation";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { Loader2 } from "lucide-react";
 
@@ -14,7 +13,7 @@ const UpdateInput = ({
   change,
   balance,
   email,
-  account,
+  useRef,
   loading,
   setLoading,
   router,
@@ -43,6 +42,7 @@ const UpdateInput = ({
 
         if (newTransaction) {
           router.refresh();
+          useRef.current.value = null
         }
       }
     } finally {
@@ -56,6 +56,7 @@ const UpdateInput = ({
         className="px-2 py-3 border rounded-lg flex gap-1 bg-gray-100"
         placeholder="Update account balance"
         onChange={(e) => change(e)}
+        ref = {useRef}
       />
       <Button
         type="submit"

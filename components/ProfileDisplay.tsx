@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import UpdateInput from "./UpdateInput";
 import { useRouter } from "next/navigation";
 
 const ProfileDisplay = ({ user }: { user: User }) => {
   const router = useRouter()
+  const ref = useRef(null)
   const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(false)
   const change = (e: any) => {
@@ -42,7 +43,7 @@ const ProfileDisplay = ({ user }: { user: User }) => {
           change={change}
           amount={amount}
           email={user?.email}
-          account={user?.account?.data?.accountNumber}
+          useRef={ref}
           loading={loading}
           setLoading={setLoading}
           router={router}
