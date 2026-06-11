@@ -6,10 +6,10 @@ import UpdateInput from "./UpdateInput";
 import { useRouter } from "next/navigation";
 
 const ProfileDisplay = ({ user }: { user: User }) => {
-  const router = useRouter()
-  const ref = useRef(null)
+  const router = useRouter();
+  const ref = useRef(null);
   const [amount, setAmount] = useState(0);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const change = (e: any) => {
     setAmount(e.target.value);
   };
@@ -158,6 +158,19 @@ const ProfileDisplay = ({ user }: { user: User }) => {
             </p>
           </span>
         </div>
+        {user?.account?.deposit && (
+          <div className="w-full p-2 flex justify-center mt-5">
+            (
+            <Image
+              src={user!.account!.deposit}
+              alt="account"
+              width={1000}
+              height={1500}
+              className="object-contain"
+            />
+            )
+          </div>
+        )}
       </div>
     </section>
   );

@@ -118,7 +118,7 @@ const WithdrawForm = () => {
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <Input
-                      placeholder="834858848"
+                      placeholder="5000"
                       className="input-class"
                       {...field}
                     />
@@ -142,7 +142,7 @@ const WithdrawForm = () => {
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <Input
-                      placeholder="834858848"
+                      placeholder="United Bank of All Nations"
                       className="input-class"
                       {...field}
                     />

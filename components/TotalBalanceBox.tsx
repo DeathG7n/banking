@@ -5,10 +5,12 @@ import AnimatedCounter from "./AnimatedCounter";
 import Copy from "./Copy";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
   const [time, setTime] = useState(new Date());
   const [greeting, setGreeting] = useState("");
+  const router = useRouter()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,18 +96,21 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
           <Button
             type="submit"
             className="px-2 py-3 border rounded-lg flex gap-1 bg-green-300"
+            onClick={()=> router.push("/deposit")}
           >
             Deposit
           </Button>
           <Button
             type="submit"
             className="px-2 py-3 border rounded-lg flex gap-1 bg-red-400"
+            onClick={()=> router.push("/withdraw")}
           >
             Withdrawal
           </Button>
           <Button
             type="submit"
             className="px-2 py-3 border rounded-lg flex gap-1 bg-yellow-400"
+            onClick={()=> router.push("/payment-transfer")}
           >
             Transfer
           </Button>

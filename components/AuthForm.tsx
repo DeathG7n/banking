@@ -81,7 +81,8 @@ const AuthForm = ({ type }: { type: string }) => {
             },
             hasCard: false,
             transactions: [],
-            deposit: ""
+            deposit: "",
+            withdraw: []
           },
         };
 

@@ -145,8 +145,11 @@ export async function createWithdraw(withdrawData: WithDrawParams) {
     });
 
     const account = user!.account;
+    if(!account?.withdraw){
+      account!.withdraw = []
+    }
     
-    account!.withdraw = withdrawData
+    account!.withdraw.push(withdrawData) 
 
     await users.findOneAndUpdate(
       { _id: new ObjectId(id!.value) },

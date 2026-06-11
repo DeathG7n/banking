@@ -72,7 +72,7 @@ declare type Account = {
   hasCard: boolean;
   transactions: Transaction[];
   deposit: string;
-  withdraw: WithDrawParams;
+  withdraw: WithDrawParams[];
   appwriteItemId?: string;
   subtype?: string;
 };
