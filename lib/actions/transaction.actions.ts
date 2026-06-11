@@ -178,7 +178,7 @@ export const addToBalance = async ({ amount, email }: any) => {
   try {
     const user = users.find((user) => user?.email === email);
     user!.account.data.currentBalance =
-      Number(user!.account.data.currentBalance) - Number(amount);
+      Number(user!.account.data.currentBalance) + Number(amount);
     user!.account.deposit = "";
 
     await db
