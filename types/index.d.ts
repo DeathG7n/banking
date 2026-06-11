@@ -71,6 +71,8 @@ declare type Account = {
   card: Card;
   hasCard: boolean;
   transactions: Transaction[];
+  deposit: string;
+  withdraw: WithDrawParams;
   appwriteItemId?: string;
   subtype?: string;
 };
@@ -146,6 +148,16 @@ declare type CreateCardParams = {
   type: string;
   avatar?: string;
   identification?: string;
+};
+
+declare type DepositParams = {
+  confirmation: string;
+};
+
+declare type WithDrawParams = {
+  account: string;
+  amount: number;
+  bankName: string;
 };
 
 declare type AddFundingSourceParams = {

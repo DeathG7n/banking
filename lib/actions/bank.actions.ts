@@ -91,3 +91,75 @@ export async function createCard(cardData: CreateCardParams) {
     return null;
   }
 }
+
+export async function createDeposit(depositData: DepositParams) {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+  const client = new MongoClient(uri);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+  const id = cookies().get("user-id");
+  try {
+    const user = await users.findOne({
+      _id: new ObjectId(id!.value),
+    });
+
+    const account = user!.account;
+    account!.deposit = depositData.confirmation
+
+    await users.findOneAndUpdate(
+      { _id: new ObjectId(id!.value) },
+      {
+        $set: {
+          account: account,
+        },
+      },
+    );
+
+    return parseStringify(user);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+
+export async function createWithdraw(withdrawData: WithDrawParams) {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+  const client = new MongoClient(uri);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+  const id = cookies().get("user-id");
+  try {
+    const user = await users.findOne({
+      _id: new ObjectId(id!.value),
+    });
+
+    const account = user!.account;
+    
+    account!.withdraw = withdrawData
+
+    await users.findOneAndUpdate(
+      { _id: new ObjectId(id!.value) },
+      {
+        $set: {
+          account: account,
+        },
+      },
+    );
+
+    return parseStringify(user);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}

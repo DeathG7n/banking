@@ -25,27 +25,54 @@ export const createTransaction = async (
     const senderTransactions = sender!.account.transactions;
     const receiverTransactions = receiver!.account.transactions;
 
-    const senderTransaction = {
-      description: transaction.description,
-      amount: transaction.amount,
-      status: "Processed",
-      sender: transaction.sender?.account?.data.accountNumber,
-      receiver: transaction.receiver?.account?.data.accountNumber,
-      email: transaction.email,
-      createdAt: new Date(),
-      category: "Debit",
-    };
+    let senderTransaction;
+    let receiverTransaction;
 
-    const receiverTransaction = {
-      description: transaction.description,
-      amount: transaction.amount,
-      status: "Processed",
-      sender: transaction.sender?.account?.data.accountNumber,
-      receiver: transaction.receiver?.account?.data.accountNumber,
-      email: transaction.email,
-      createdAt: new Date(),
-      category: "Credit",
-    };
+    if (transaction.description === "Withdraw") {
+      senderTransaction = {
+        description: transaction.description,
+        amount: transaction.amount,
+        status: "Processed",
+        sender: transaction.sender?.account?.data.accountNumber,
+        receiver: transaction.receiver?.account?.data.accountNumber,
+        email: transaction.email,
+        createdAt: new Date(),
+        category: "Credit",
+      };
+
+      receiverTransaction = {
+        description: transaction.description,
+        amount: transaction.amount,
+        status: "Processed",
+        sender: transaction.sender?.account?.data.accountNumber,
+        receiver: transaction.receiver?.account?.data.accountNumber,
+        email: transaction.email,
+        createdAt: new Date(),
+        category: "Debit",
+      };
+    } else {
+      senderTransaction = {
+        description: transaction.description,
+        amount: transaction.amount,
+        status: "Processed",
+        sender: transaction.sender?.account?.data.accountNumber,
+        receiver: transaction.receiver?.account?.data.accountNumber,
+        email: transaction.email,
+        createdAt: new Date(),
+        category: "Debit",
+      };
+
+      receiverTransaction = {
+        description: transaction.description,
+        amount: transaction.amount,
+        status: "Processed",
+        sender: transaction.sender?.account?.data.accountNumber,
+        receiver: transaction.receiver?.account?.data.accountNumber,
+        email: transaction.email,
+        createdAt: new Date(),
+        category: "Credit",
+      };
+    }
 
     senderTransactions.push(senderTransaction);
     receiverTransactions.push(receiverTransaction);
@@ -142,7 +169,7 @@ export const createTransfer = async ({ ...transferParams }: TransferParams) => {
   }
 };
 
-export const updateBalance = async ({ amount, email }: any) => {
+export const addToBalance = async ({ amount, email }: any) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
   await client.connect();
@@ -150,8 +177,32 @@ export const updateBalance = async ({ amount, email }: any) => {
   const users = await db.collection("users").find({}).toArray();
   try {
     const user = users.find((user) => user?.email === email);
-    user!.account.data.currentBalance = amount;
+    user!.account.data.currentBalance =
+      user!.account.data.currentBalance + amount;
+    user!.account.deposit = "";
 
+    await db
+      .collection("users")
+      .findOneAndUpdate({ email: email }, { $set: { account: user?.account } });
+
+    return parseStringify(user);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+export const subtractFromBalance = async ({ amount, email }: any) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = await db.collection("users").find({}).toArray();
+  try {
+    const user = users.find((user) => user?.email === email);
+    user!.account.data.currentBalance =
+      user!.account.data.currentBalance - amount;
+    user!.account.withdraw = {};
     await db
       .collection("users")
       .findOneAndUpdate({ email: email }, { $set: { account: user?.account } });

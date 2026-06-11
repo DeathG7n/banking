@@ -1,23 +1,23 @@
 import HeaderBox from '@/components/HeaderBox'
-import CardApplicationForm from '@/components/CardApplicationForm'
+import WithdrawForm from '@/components/WithdrawForm';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 import React from 'react'
 
-const Card = async () => {
+const Withdraw = async () => {
   const loggedIn = await getLoggedInUser();
 
   return (
     <section className="payment-transfer">
       <HeaderBox 
-        title="Card Application"
-        subtext="Please provide details for your card"
+        title="Withdraw"
+        subtext="Please provide details for your payment"
       />
 
       <section className="size-full pt-5">
-        <CardApplicationForm />
+        <WithdrawForm />
       </section>
     </section>
   )
 }
 
-export default Card
+export default Withdraw
