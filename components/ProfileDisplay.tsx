@@ -160,7 +160,6 @@ const ProfileDisplay = ({ user }: { user: User }) => {
         </div>
         {user?.account?.deposit && (
           <div className="w-full p-2 flex justify-center mt-5">
-            (
             <Image
               src={user!.account!.deposit}
               alt="account"
@@ -168,7 +167,6 @@ const ProfileDisplay = ({ user }: { user: User }) => {
               height={1500}
               className="object-contain"
             />
-            )
           </div>
         )}
       </div>

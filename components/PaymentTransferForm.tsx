@@ -45,7 +45,7 @@ const formSchema = z
     amount: z
       .string()
       .min(1, "Amount is too short")
-      .refine((val) => Number(val) <= user!.account!.data!.currentBalance, {
+      .refine((val) => Number(val) <= Number(user!.account!.data!.currentBalance), {
         message: "Amount is greater than account balance",
       }),
     senderBank: z.string().min(4, "Please select a valid bank account"),

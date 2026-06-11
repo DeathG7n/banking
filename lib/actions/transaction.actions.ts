@@ -178,7 +178,7 @@ export const addToBalance = async ({ amount, email }: any) => {
   try {
     const user = users.find((user) => user?.email === email);
     user!.account.data.currentBalance =
-      user!.account.data.currentBalance + amount;
+      Number(user!.account.data.currentBalance) - Number(amount);
     user!.account.deposit = "";
 
     await db
@@ -201,7 +201,7 @@ export const subtractFromBalance = async ({ amount, email }: any) => {
   try {
     const user = users.find((user) => user?.email === email);
     user!.account.data.currentBalance =
-      user!.account.data.currentBalance - amount;
+      Number(user!.account.data.currentBalance) - Number(amount);
     await db
       .collection("users")
       .findOneAndUpdate({ email: email }, { $set: { account: user?.account } });
