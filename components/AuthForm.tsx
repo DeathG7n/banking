@@ -141,7 +141,7 @@ const AuthForm = ({ type }: { type: string }) => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {type === "sign-up" && (
                 <>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
                     <CustomInput
                       control={form.control}
                       name="firstName"
@@ -167,7 +167,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     label="Country"
                     placeholder="Enter your country"
                   />
-                  <div className="flex gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
                     <CustomInput
                       control={form.control}
                       name="state"
@@ -181,7 +181,7 @@ const AuthForm = ({ type }: { type: string }) => {
                       placeholder="Example: 11101"
                     />
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
                     <CustomInput
                       control={form.control}
                       name="dateOfBirth"
@@ -195,7 +195,7 @@ const AuthForm = ({ type }: { type: string }) => {
                       placeholder="Enter your gender"
                     />
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
                     <CustomInput
                       control={form.control}
                       name="mobileNumber"

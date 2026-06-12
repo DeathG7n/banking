@@ -294,7 +294,7 @@
   .form-item {
     @apply flex flex-col gap-1.5;
   }
-
+ 
   .form-label {
     @apply text-14 w-full max-w-[280px] font-medium text-gray-700;
   }
