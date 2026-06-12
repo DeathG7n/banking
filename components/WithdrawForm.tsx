@@ -8,14 +8,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { createWithdraw } from "@/lib/actions/bank.actions";
-import {
-  getActiveAccounts,
-  getAccountById,
-  getLoggedInUser,
-} from "@/lib/actions/user.actions";
-import { fileToBase64 } from "@/lib/utils";
-
-import { CardDropdown } from "./CardDropdown";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { Button } from "./ui/button";
 import {
   Form,
@@ -27,26 +20,21 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-
-let activeAccounts: string[] = [];
-let user: User;
-
-const formSchema = z.object({
-  account: z.string().min(4, "Please enter your account name."),
-  amount: z.string().min(1, "Please enter your withdrawal amount."),
-  bankName: z.string().min(4, "Please enter your bank name."),
-});
+import { createTransaction } from "@/lib/actions/transaction.actions";
 
 const WithdrawForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [recipient, setRecipient] = useState<Data | null>(null);
+  const [otp, setOtp] = useState(false);
 
-  const getAccounts = async () => {
-    user = await getLoggedInUser();
-    activeAccounts = await getActiveAccounts();
-  };
-  getAccounts();
+  const formSchema = z.object({
+    account: z.string().min(8),
+    amount: z.string().min(1, "Please enter your withdrawal amount."),
+    bankName: z.string().min(4, "Please enter your bank name."),
+    otp: otp
+      ? z.string().min(6, "OTP must contain at least 6 characters").max(6)
+      : z.string().optional(),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,10 +42,16 @@ const WithdrawForm = () => {
       account: "",
       amount: "",
       bankName: "",
+      otp: "",
     },
   });
 
+  const requestOtp = () => {
+    setOtp(true);
+  };
+
   const submit = async (data: z.infer<typeof formSchema>) => {
+    if (data.otp === "") return;
     setIsLoading(true);
 
     try {
@@ -70,8 +64,23 @@ const WithdrawForm = () => {
       const withdraw = await createWithdraw(withDrawParams);
 
       if (withdraw) {
-        form.reset();
-        router.push("/");
+        const sender = await getLoggedInUser();
+
+        const transaction = {
+          description: "Withdraw",
+          amount: String(data.amount),
+          status: "Processing",
+          sender,
+          receiver: sender,
+          email: sender.email,
+        };
+
+        const newTransaction = await createTransaction(transaction);
+
+        if (newTransaction) {
+          form.reset();
+          router.push("/");
+        }
       }
     } catch (error) {
       console.error(error);
@@ -132,7 +141,7 @@ const WithdrawForm = () => {
 
         <FormField
           control={form.control}
-          name="account"
+          name="bankName"
           render={({ field }) => (
             <FormItem className="border-t border-gray-200">
               <div className="payment-transfer_form-item py-5">
@@ -153,21 +162,65 @@ const WithdrawForm = () => {
             </FormItem>
           )}
         />
+        {otp && (
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem className="border-t border-gray-200">
+                <div className="payment-transfer_form-item py-5">
+                  <FormLabel className="text-14 w-full max-w-[280px] font-medium text-gray-700">
+                    Enter OTP code
+                  </FormLabel>
+                  <div className="flex w-full flex-col">
+                    <FormControl>
+                      <Input
+                        placeholder="094384"
+                        className="input-class"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-12 text-red-500" />
+                  </div>
+                </div>
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="payment-transfer_btn-box">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="payment-transfer_btn"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={20} className="animate-spin" /> &nbsp; Sending...
-              </>
-            ) : (
-              "Withdraw"
-            )}
-          </Button>
+          {otp ? (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="payment-transfer_btn"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" /> &nbsp;
+                  Sending...
+                </>
+              ) : (
+                "Withdraw"
+              )}
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="payment-transfer_btn"
+              onClick={() => requestOtp()}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" /> &nbsp;
+                  Sending...
+                </>
+              ) : (
+                "Request Otp"
+              )}
+            </Button>
+          )}
         </div>
       </form>
     </Form>

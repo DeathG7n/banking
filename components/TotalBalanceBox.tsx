@@ -95,50 +95,20 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
         <div className="flex gap-2">
           <Button
             type="submit"
-            className="px-2 py-3 border rounded-lg flex gap-1 bg-green-300"
+            className="px-2 py-3 rounded-lg flex gap-1 bg-green-500"
             onClick={()=> router.push("/deposit")}
           >
             Deposit
           </Button>
           <Button
             type="submit"
-            className="px-2 py-3 border rounded-lg flex gap-1 bg-red-400"
-            onClick={()=> router.push("/withdraw")}
-          >
-            Withdrawal
-          </Button>
-          <Button
-            type="submit"
-            className="px-2 py-3 border rounded-lg flex gap-1 bg-yellow-400"
-            onClick={()=> router.push("/payment-transfer")}
+            className="px-2 py-3 rounded-lg flex gap-1 bg-red-500"
+            onClick={()=> router.push("/transfer")}
           >
             Transfer
           </Button>
         </div>
-
-        {/* <div className="flex flex-col border">
-          <p className="text-20 text-white text-right font-bold">00:00:00</p>
-          <p className="text-12 font-light ">Saturday 30 May 2026</p>
-        </div> */}
       </div>
-      {/* <div className="total-balance-chart">
-        <DoughnutChart accounts={accounts} />
-      </div> */}
-
-      {/* <div className="flex flex-col gap-6">
-        <h2 className="header-2">
-          Account Number: {account.accountNumber}
-        </h2>
-        <div className="flex flex-col gap-2">
-          <p className="total-balance-label">
-            Total Current Balance
-          </p>
-
-          <div className="total-balance-amount flex-center gap-2">
-            <AnimatedCounter amount={account.currentBalance} />
-          </div>
-        </div>
-      </div> */}
     </section>
   );
 };

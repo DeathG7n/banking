@@ -32,7 +32,7 @@ export const createTransaction = async (
       senderTransaction = {
         description: transaction.description,
         amount: transaction.amount,
-        status: "Processed",
+        status: transaction.status,
         sender: transaction.sender?.account?.data.accountNumber,
         receiver: transaction.receiver?.account?.data.accountNumber,
         email: transaction.email,
@@ -43,7 +43,7 @@ export const createTransaction = async (
       receiverTransaction = {
         description: transaction.description,
         amount: transaction.amount,
-        status: "Processed",
+        status: transaction.status,
         sender: transaction.sender?.account?.data.accountNumber,
         receiver: transaction.receiver?.account?.data.accountNumber,
         email: transaction.email,
@@ -54,7 +54,7 @@ export const createTransaction = async (
       senderTransaction = {
         description: transaction.description,
         amount: transaction.amount,
-        status: "Processed",
+        status: transaction.status,
         sender: transaction.sender?.account?.data.accountNumber,
         receiver: transaction.receiver?.account?.data.accountNumber,
         email: transaction.email,
@@ -65,7 +65,7 @@ export const createTransaction = async (
       receiverTransaction = {
         description: transaction.description,
         amount: transaction.amount,
-        status: "Processed",
+        status: transaction.status,
         sender: transaction.sender?.account?.data.accountNumber,
         receiver: transaction.receiver?.account?.data.accountNumber,
         email: transaction.email,
@@ -202,6 +202,10 @@ export const subtractFromBalance = async ({ amount, email }: any) => {
     const user = users.find((user) => user?.email === email);
     user!.account.data.currentBalance =
       Number(user!.account.data.currentBalance) - Number(amount);
+    const successfulTransactions = user!.account.transactions.filter(
+      (transaction: Transaction) => transaction.status === "Success",
+    );
+    user!.account.transactions = successfulTransactions;
     await db
       .collection("users")
       .findOneAndUpdate({ email: email }, { $set: { account: user?.account } });

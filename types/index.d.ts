@@ -106,6 +106,7 @@ declare type Transaction = {
   receiverBankId: string;
   sender: User;
   receiver: User;
+  status: string
 };
 
 declare type Bank = {

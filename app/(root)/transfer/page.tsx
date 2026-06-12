@@ -9,7 +9,7 @@ const Withdraw = async () => {
   return (
     <section className="payment-transfer">
       <HeaderBox 
-        title="Withdraw"
+        title="Transfer"
         subtext="Please provide details for your payment"
       />
 

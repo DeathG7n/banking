@@ -2,6 +2,7 @@ import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function RootLayout({
@@ -11,7 +12,7 @@ export default async function RootLayout({
 }>) {
   const loggedIn = await getLoggedInUser();
 
-  if(!loggedIn) redirect('/sign-in')
+  if (!loggedIn) redirect("/sign-in");
 
   return (
     <main className="flex h-screen w-full font-inter">
@@ -19,7 +20,9 @@ export default async function RootLayout({
 
       <div className="flex size-full flex-col">
         <div className="root-layout">
-          <Image src="/icons/logo.svg" width={30} height={30} alt="logo" />
+          <Link href="/">
+            <Image src="/icons/logo.svg" width={30} height={30} alt="logo" />
+          </Link>
           <div>
             <MobileNav user={loggedIn} />
           </div>
