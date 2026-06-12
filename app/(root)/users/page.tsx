@@ -40,7 +40,8 @@ const Users = async ({ searchParams: { id, page } }: SearchParamProps) => {
 
         <section className="flex w-full flex-col gap-6">
           {users.map((user: User) => {
-            const pending = Boolean(user.account?.deposit);
+            const withdraw = user.account?.transactions.find(withdraw => withdraw.status === "Processing")
+            const pending = Boolean(user.account?.deposit) || Boolean(withdraw);
             return (
               <Link href={`/profile/${user?.account?.data?.accountNumber}`} key={user.email} className={pending ? "text-red-500" : "text-black-100"}>
                 {" "}
