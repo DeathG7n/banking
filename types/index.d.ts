@@ -30,23 +30,24 @@ declare type LoginUser = {
 
 declare type User = {
   $id?: string;
-  email?: string;
+  email: string;
+  password: string;
   avatar?: string;
   admin?: boolean;
   identification?: string;
-  gender: string;
-  maritalStatus: string;
-  occupation: string;
-  mobileNumber: string;
+  gender?: string;
+  maritalStatus?: string;
+  occupation?: string;
+  mobileNumber?: string;
   account?: Account;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   name?: string;
-  address: string;
-  country: string;
-  state: string;
-  postalCode: string;
-  dateOfBirth: string;
+  address?: string;
+  country?: string;
+  state?: string;
+  postalCode?: string;
+  dateOfBirth?: string;
 };
 
 declare type NewUserParams = {

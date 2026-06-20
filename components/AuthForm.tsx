@@ -87,9 +87,7 @@ const AuthForm = ({ type }: { type: string }) => {
         };
 
         const newUser = await signUp(userData);
-        if (newUser) router.push("/sign-in");
-
-        // setUser(newUser);
+        if (newUser) router.push("/");
       }
 
       if (type === "sign-in") {
@@ -98,7 +96,11 @@ const AuthForm = ({ type }: { type: string }) => {
           password: data.password,
         });
 
-        if (response) router.push("/");
+        if (response?.firstName === undefined){
+          router.push("/sign-up");
+        } else{
+          router.push("/");
+        }
       }
     } catch (error) {
       console.log(error);

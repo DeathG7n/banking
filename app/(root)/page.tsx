@@ -7,7 +7,7 @@ import { getLoggedInUser } from "@/lib/actions/user.actions";
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const account = loggedIn.account
+  const account = loggedIn?.account
 
   return (
     <section className="home">

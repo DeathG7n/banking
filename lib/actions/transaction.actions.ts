@@ -80,18 +80,28 @@ export const createTransaction = async (
     sender!.account.transactions = senderTransactions;
     receiver!.account.transactions = receiverTransactions;
 
-    await db
-      .collection("users")
-      .findOneAndUpdate(
-        { _id: new ObjectId(sender?._id!) },
-        { $set: { account: sender!.account } },
-      );
-    await db
-      .collection("users")
-      .findOneAndUpdate(
-        { _id: new ObjectId(receiver?._id!) },
-        { $set: { account: receiver!.account } },
-      );
+    if (sender!.email === receiver!.email) {
+      await db
+        .collection("users")
+        .findOneAndUpdate(
+          { _id: new ObjectId(sender?._id!) },
+          { $set: { account: sender!.account } },
+        );
+    } else {
+      await db
+        .collection("users")
+        .findOneAndUpdate(
+          { _id: new ObjectId(sender?._id!) },
+          { $set: { account: sender!.account } },
+        );
+      await db
+        .collection("users")
+        .findOneAndUpdate(
+          { _id: new ObjectId(receiver?._id!) },
+          { $set: { account: receiver!.account } },
+        );
+    }
+
     const transactions = {
       sender: senderTransaction,
       receiver: receiverTransaction,

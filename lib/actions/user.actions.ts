@@ -10,7 +10,7 @@ export const signIn = async ({ email, password }: signInProps) => {
   const client = new MongoClient(uri!);
   await client.connect();
   const db = client.db("banking");
-  const users = db.collection("users");
+  const users = db.collection<User>("users");
 
   try {
     const user = await users.findOne({
@@ -51,6 +51,47 @@ export const signUp = async (userData: SignUpParams) => {
       email: userData.email,
     });
 
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
+    const user = {
+      ...userData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const newUser = await users.insertOne(user);
+    if (newUser) {
+      await users.deleteOne({
+        _id: new ObjectId(existingUser?._id)
+      });
+    }
+
+    cookies().set("user-email", userData.email, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return parseStringify(newUser);
+  } catch (error) {
+    throw error;
+  } finally {
+    await client.close();
+  }
+};
+export const createUser = async (userData: LoginUser) => {
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db("banking");
+  const users = db.collection<User>("users");
+
+  try {
+    const existingUser = await users.findOne({
+      email: userData.email,
+    });
+
     if (existingUser) {
       throw new Error("User already exists");
     }
@@ -60,13 +101,6 @@ export const signUp = async (userData: SignUpParams) => {
       updatedAt: new Date(),
     };
     const newUser = await users.insertOne(user);
-
-    cookies().set("user-email", userData.email, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
 
     return parseStringify(newUser);
   } catch (error) {

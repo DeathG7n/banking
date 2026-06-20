@@ -24,6 +24,11 @@ const MobileNav = ({ user }: MobileNavProps) => {
     route: "/users",
     label: "Users",
   };
+  const create = {
+    imgURL: "/icons/home.svg",
+    route: "/create",
+    label: "Create User",
+  };
   const isActiveForAdmin =
     pathname === admin.route || pathname.startsWith(`${admin.route}/`);
 
@@ -58,32 +63,60 @@ const MobileNav = ({ user }: MobileNavProps) => {
             <SheetClose asChild>
               <nav className="flex h-full flex-col gap-6 pt-16 text-white">
                 {user.admin && (
-                  <SheetClose asChild>
-                    <Link
-                      href={admin.route}
-                      key={admin.label}
-                      className={cn("mobilenav-sheet_close w-full", {
-                        "bg-bank-gradient": isActiveForAdmin,
-                      })}
-                    >
-                      <Image
-                        src={admin.imgURL}
-                        alt={admin.label}
-                        width={20}
-                        height={20}
-                        className={cn({
-                          "brightness-[3] invert-0": isActiveForAdmin,
-                        })}
-                      />
-                      <p
-                        className={cn("text-16 font-semibold text-black-2", {
-                          "text-white": isActiveForAdmin,
+                  <>
+                    <SheetClose asChild>
+                      <Link
+                        href={admin.route}
+                        key={admin.label}
+                        className={cn("mobilenav-sheet_close w-full", {
+                          "bg-bank-gradient": isActiveForAdmin,
                         })}
                       >
-                        {admin.label}
-                      </p>
-                    </Link>
-                  </SheetClose>
+                        <Image
+                          src={admin.imgURL}
+                          alt={admin.label}
+                          width={20}
+                          height={20}
+                          className={cn({
+                            "brightness-[3] invert-0": isActiveForAdmin,
+                          })}
+                        />
+                        <p
+                          className={cn("text-16 font-semibold text-black-2", {
+                            "text-white": isActiveForAdmin,
+                          })}
+                        >
+                          {admin.label}
+                        </p>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        href={create.route}
+                        key={create.label}
+                        className={cn("mobilenav-sheet_close w-full", {
+                          "bg-bank-gradient": isActiveForAdmin,
+                        })}
+                      >
+                        <Image
+                          src={create.imgURL}
+                          alt={create.label}
+                          width={20}
+                          height={20}
+                          className={cn({
+                            "brightness-[3] invert-0": isActiveForAdmin,
+                          })}
+                        />
+                        <p
+                          className={cn("text-16 font-semibold text-black-2", {
+                            "text-white": isActiveForAdmin,
+                          })}
+                        >
+                          {create.label}
+                        </p>
+                      </Link>
+                    </SheetClose>
+                  </>
                 )}
                 {sidebarLinks.map((item) => {
                   const isActive =

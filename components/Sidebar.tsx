@@ -15,6 +15,11 @@ const Sidebar = ({ user }: SiderbarProps) => {
     route: "/users",
     label: "Users",
   };
+  const create = {
+    imgURL: "/icons/home.svg",
+    route: "/create",
+    label: "Create User",
+  };
   const isActiveForAdmin =
     pathname === admin.route || pathname.startsWith(`${admin.route}/`);
 
@@ -33,31 +38,58 @@ const Sidebar = ({ user }: SiderbarProps) => {
         </Link>
 
         {user.admin && (
-          <Link
-            href={admin.route}
-            key={admin.label}
-            className={cn("sidebar-link", {
-              "bg-bank-green-gradient": isActiveForAdmin,
-            })}
-          >
-            <div className="relative size-4">
-              <Image
-                src={admin.imgURL}
-                alt={admin.label}
-                fill
-                className={cn({
-                  "brightness-[3] invert-0": isActiveForAdmin,
-                })}
-              />
-            </div>
-            <p
-              className={cn("sidebar-label", {
-                "!text-white": isActiveForAdmin,
+          <>
+            <Link
+              href={admin.route}
+              key={admin.label}
+              className={cn("sidebar-link", {
+                "bg-bank-green-gradient": isActiveForAdmin,
               })}
             >
-              {admin.label}
-            </p>
-          </Link>
+              <div className="relative size-4">
+                <Image
+                  src={admin.imgURL}
+                  alt={admin.label}
+                  fill
+                  className={cn({
+                    "brightness-[3] invert-0": isActiveForAdmin,
+                  })}
+                />
+              </div>
+              <p
+                className={cn("sidebar-label", {
+                  "!text-white": isActiveForAdmin,
+                })}
+              >
+                {admin.label}
+              </p>
+            </Link>
+            <Link
+              href={create.route}
+              key={create.label}
+              className={cn("sidebar-link", {
+                "bg-bank-green-gradient": isActiveForAdmin,
+              })}
+            >
+              <div className="relative size-4">
+                <Image
+                  src={create.imgURL}
+                  alt={create.label}
+                  fill
+                  className={cn({
+                    "brightness-[3] invert-0": isActiveForAdmin,
+                  })}
+                />
+              </div>
+              <p
+                className={cn("sidebar-label", {
+                  "!text-white": isActiveForAdmin,
+                })}
+              >
+                {create.label}
+              </p>
+            </Link>
+          </>
         )}
         {sidebarLinks.map((item) => {
           const isActive =
