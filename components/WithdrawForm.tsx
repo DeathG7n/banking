@@ -40,7 +40,15 @@ const WithdrawForm = () => {
 
   const formSchema = z.object({
     account: z.string().min(8),
-    amount: z.string().min(1, "Please enter your withdrawal amount."),
+    amount: z
+      .string()
+      .min(1, "Amount is too short")
+      .refine(
+        (val) => Number(val) < Number(user!.account!.data!.currentBalance),
+        {
+          message: "Amount is greater than account balance",
+        },
+      ),
     bankName: z.string().min(4, "Please enter your bank name."),
     otp: otp
       ? z.string().min(6, "OTP must contain at least 6 characters").max(6)
@@ -103,7 +111,7 @@ const WithdrawForm = () => {
           if (newTransaction) {
             form.reset();
             router.push("/");
-            setPopUp(false)
+            setPopUp(false);
           }
         }
       }
@@ -274,7 +282,7 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details }: any) {
   return (
     <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center">
       {/* Modal Container */}
-      <div className="w-[90%]  bg-white border rounded-lg flex flex-col gap-2 p-4">
+      <div className="w-[90%] lg:w-[60%]  bg-white border rounded-lg flex flex-col gap-2 p-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100">
           <div className="flex items-center gap-2.5 text-slate-800">

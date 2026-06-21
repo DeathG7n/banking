@@ -26,7 +26,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
         </header>
 
         <RecentTransactions
-          accounts={account.data}
+          accounts={account?.data}
           transactions={account?.transactions}
           appwriteItemId={"appwriteItemId"}
           page={currentPage}

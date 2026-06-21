@@ -40,6 +40,7 @@ const CreateUserForm = () => {
         message: "User already exists",
       }),
     password: z.string().min(8),
+    amount: z.string().min(1)
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,6 +48,7 @@ const CreateUserForm = () => {
     defaultValues: {
       email: "",
       password: "",
+      amount: ""
     },
   });
 
@@ -57,6 +59,7 @@ const CreateUserForm = () => {
       const userData = {
         email: data.email,
         password: data.password,
+        amount: Number(data.amount)
       };
       const newUser = await createUser(userData);
       if(newUser){
@@ -111,6 +114,31 @@ const CreateUserForm = () => {
                       placeholder="*********"
                       className="input-class"
                       type="password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-12 text-red-500" />
+                </div>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem className="border-t border-gray-200">
+              <div className="payment-transfer_form-item py-5">
+                <FormLabel className="text-14 w-full max-w-[280px] font-medium text-gray-700">
+                  Amount
+                </FormLabel>
+                <div className="flex w-full flex-col">
+                  <FormControl>
+                    <Input
+                      placeholder="5000"
+                      className="input-class"
+                      type="text"
                       {...field}
                     />
                   </FormControl>

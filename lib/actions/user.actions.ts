@@ -54,6 +54,7 @@ export const signUp = async (userData: SignUpParams) => {
     if (!existingUser) {
       throw new Error("User not found");
     }
+    userData.account.data.currentBalance = existingUser.amount ?? 0
     const user = {
       ...userData,
       createdAt: new Date(),
@@ -80,7 +81,7 @@ export const signUp = async (userData: SignUpParams) => {
     await client.close();
   }
 };
-export const createUser = async (userData: LoginUser) => {
+export const createUser = async (userData: CreateUser) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
   await client.connect();

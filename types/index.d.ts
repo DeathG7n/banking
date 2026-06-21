@@ -21,11 +21,18 @@ declare type SignUpParams = {
   mobileNumber: string;
   email: string;
   password: string;
+  account: Account;
 };
 
 declare type LoginUser = {
   email: string;
   password: string;
+};
+
+declare type CreateUser = {
+  email: string;
+  password: string;
+  amount: number;
 };
 
 declare type User = {
@@ -48,6 +55,7 @@ declare type User = {
   state?: string;
   postalCode?: string;
   dateOfBirth?: string;
+  amount?: number;
 };
 
 declare type NewUserParams = {
@@ -66,8 +74,6 @@ declare type Card = {
 };
 
 declare type Account = {
-  idCard: string;
-  image: string;
   data: Data;
   card: Card;
   hasCard: boolean;
@@ -107,7 +113,7 @@ declare type Transaction = {
   receiverBankId: string;
   sender: User;
   receiver: User;
-  status: string
+  status: string;
 };
 
 declare type Bank = {

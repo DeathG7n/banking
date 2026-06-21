@@ -27,7 +27,7 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
     }
 
     return () => clearInterval(interval);
-  }, []);
+  }, [time]);
 
   const formattedTime = time.toLocaleTimeString("en-GB", {
     hour12: false,
