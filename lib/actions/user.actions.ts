@@ -51,21 +51,16 @@ export const signUp = async (userData: SignUpParams) => {
       email: userData.email,
     });
 
-    if (!existingUser) {
-      throw new Error("User not found");
+    if (existingUser) {
+      throw new Error("User already exists");
     }
-    userData.account.data.currentBalance = existingUser.amount ?? 0
+    
     const user = {
       ...userData,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
     const newUser = await users.insertOne(user);
-    if (newUser) {
-      await users.deleteOne({
-        _id: new ObjectId(existingUser?._id)
-      });
-    }
 
     // cookies().set("user-email", userData.email, {
     //   path: "/",
