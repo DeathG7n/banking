@@ -26,7 +26,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
   };
   const create = {
     imgURL: "/icons/home.svg",
-    route: "/create",
+    route: "/sign-up",
     label: "Create User",
   };
   const isActiveForAdmin =

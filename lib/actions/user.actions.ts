@@ -67,12 +67,12 @@ export const signUp = async (userData: SignUpParams) => {
       });
     }
 
-    cookies().set("user-email", userData.email, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
+    // cookies().set("user-email", userData.email, {
+    //   path: "/",
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: true,
+    // });
 
     return parseStringify(newUser);
   } catch (error) {

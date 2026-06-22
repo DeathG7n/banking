@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import CustomInput from "./CustomInput";
-import { authFormSchema } from "@/lib/utils";
+import { authFormSchema, fileToBase64 } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/actions/user.actions";
+import CustomFileInput from "./CustomFileInput";
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
@@ -45,9 +46,11 @@ const AuthForm = ({ type }: { type: string }) => {
     setIsLoading(true);
 
     try {
-      // Sign up with Appwrite & create plaid token
-
       if (type === "sign-up") {
+        const [avatar, identification] = await Promise.all([
+          fileToBase64(data.avatar!),
+          fileToBase64(data.identification!),
+        ]);
         const userData = {
           firstName: data.firstName!,
           lastName: data.lastName!,
@@ -60,11 +63,13 @@ const AuthForm = ({ type }: { type: string }) => {
           maritalStatus: data.maritalStatus!,
           occupation: data.occupation!,
           mobileNumber: data.mobileNumber!,
+          avatar,
+          identification,
           email: data.email,
           password: data.password,
           account: {
             data: {
-              currentBalance: 0,
+              currentBalance: Number(data.amount!) || 0,
               name: data.firstName! + " " + data.lastName!,
               firstName: data.firstName!,
               lastName: data.lastName!,
@@ -82,7 +87,7 @@ const AuthForm = ({ type }: { type: string }) => {
             hasCard: false,
             transactions: [],
             deposit: "",
-            withdraw: []
+            withdraw: [],
           },
         };
 
@@ -96,9 +101,7 @@ const AuthForm = ({ type }: { type: string }) => {
           password: data.password,
         });
 
-        if (response?.firstName === undefined){
-          router.push("/sign-up");
-        } else{
+        if (response) {
           router.push("/");
         }
       }
@@ -217,6 +220,25 @@ const AuthForm = ({ type }: { type: string }) => {
                     label="Occupation"
                     placeholder="What do you do for a living?"
                   />
+                  <CustomInput
+                    control={form.control}
+                    name="amount"
+                    label="Amount"
+                    placeholder="How much does the user want to start with?"
+                  />
+                  <CustomFileInput
+                    control={form.control}
+                    name="avatar"
+                    label="Profile Picture"
+                    placeholder="Select an image"
+                  />
+
+                  <CustomFileInput
+                    control={form.control}
+                    name="identification"
+                    label="Form of Identification"
+                    placeholder="Select an image"
+                  />
                 </>
               )}
 
@@ -251,7 +273,7 @@ const AuthForm = ({ type }: { type: string }) => {
             </form>
           </Form>
 
-          <footer className="flex justify-center gap-1">
+          {/* <footer className="flex justify-center gap-1">
             <p className="text-14 font-normal text-gray-600">
               {type === "sign-in"
                 ? "Don't have an account?"
@@ -263,7 +285,7 @@ const AuthForm = ({ type }: { type: string }) => {
             >
               {type === "sign-in" ? "Sign up" : "Sign in"}
             </Link>
-          </footer>
+          </footer> */}
         </>
       )}
     </section>

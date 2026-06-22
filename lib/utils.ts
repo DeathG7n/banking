@@ -4,6 +4,9 @@ import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -213,6 +216,38 @@ export const authFormSchema = (type: string) =>
     occupation: type === "sign-in" ? z.string().optional() : z.string().min(3),
     mobileNumber:
       type === "sign-in" ? z.string().optional() : z.string().min(3).max(15),
+    amount:
+      type === "sign-in" ? z.string().optional() : z.string().min(1),
+    avatar:
+      type === "sign-in"
+        ? z
+            .instanceof(File, { message: "Please select an image file." })
+            .optional()
+        : z
+            .instanceof(File, { message: "Please select an image file." })
+            .refine(
+              (file) => file.size <= MAX_FILE_SIZE,
+              `Max image size is 5MB.`,
+            )
+            .refine(
+              (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+              "Only .jpg, .png and .webp formats are supported.",
+            ),
+    identification:
+      type === "sign-in"
+        ? z
+            .instanceof(File, { message: "Please select an image file." })
+            .optional()
+        : z
+            .instanceof(File, { message: "Please select an image file." })
+            .refine(
+              (file) => file.size <= MAX_FILE_SIZE,
+              `Max image size is 5MB.`,
+            )
+            .refine(
+              (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+              "Only .jpg, .png and .webp formats are supported.",
+            ),
     // both
     email: z.string().email(),
     password: z.string().min(8),

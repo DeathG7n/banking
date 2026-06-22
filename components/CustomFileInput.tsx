@@ -15,7 +15,7 @@ interface CustomInput {
   placeholder: string;
 }
 
-const CustomInput = ({ control, name, label, placeholder }: CustomInput) => {
+const CustomFileInput = ({ control, name, label, placeholder }: CustomInput) => {
   return (
     <FormField
       control={control}
@@ -26,11 +26,13 @@ const CustomInput = ({ control, name, label, placeholder }: CustomInput) => {
           <div className="flex w-full flex-col">
             <FormControl>
               <Input
-                placeholder={placeholder}
+                type="file"
+                accept="image/*"
                 className="input-class"
-                type={name === "password" ? "password" : "text"}
-                value={field.value ?? ""}
-                onChange={field.onChange}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  field.onChange(file);
+                }}
               />
             </FormControl>
             <FormMessage className="form-message mt-2" />
@@ -41,4 +43,4 @@ const CustomInput = ({ control, name, label, placeholder }: CustomInput) => {
   );
 };
 
-export default CustomInput;
+export default CustomFileInput;
