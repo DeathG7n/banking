@@ -44,10 +44,10 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
       <TableBody>
         {transactions?.map((t: Transaction) => {
           const status = t.status;
-          const amount = formatAmount(t.amount);
+          const amount = formatAmount(Number(t.amount));
 
-          const isDebit = t.type === "debit";
-          const isCredit = t.type === "credit";
+          const isDebit = t?.category === "Debit";
+          const isCredit = t?.category === "Credit";
 
           return (
             <TableRow
