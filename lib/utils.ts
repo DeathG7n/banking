@@ -216,8 +216,7 @@ export const authFormSchema = (type: string) =>
     occupation: type === "sign-in" ? z.string().optional() : z.string().min(3),
     mobileNumber:
       type === "sign-in" ? z.string().optional() : z.string().min(3).max(15),
-    amount:
-      type === "sign-in" ? z.string().optional() : z.string().min(1),
+    amount: type === "sign-in" ? z.string().optional() : z.string().min(1),
     avatar:
       type === "sign-in"
         ? z
@@ -314,6 +313,12 @@ export function generateExpiryDate() {
   const year = String(date.getFullYear()).slice(-2);
 
   return `${month}/${year}`;
+}
+
+export function generateOTP() {
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  return otp;
 }
 
 export function validateExpiryDate(expiryStr: string) {

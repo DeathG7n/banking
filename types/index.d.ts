@@ -56,6 +56,10 @@ declare type User = {
   postalCode?: string;
   dateOfBirth?: string;
   amount?: number;
+  otp? : {
+    code : number;
+    createdAt: Date;
+  }
 };
 
 declare type NewUserParams = {

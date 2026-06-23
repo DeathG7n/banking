@@ -7,7 +7,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { createWithdraw } from "@/lib/actions/bank.actions";
+import {
+  createOTP,
+  createWithdraw,
+  deleteOTP,
+} from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { Button } from "./ui/button";
 import {
@@ -29,6 +33,7 @@ import { X, AlertTriangle, CheckCircle2 } from "lucide-react";
 const WithdrawForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [otp, setOtp] = useState(false);
   const [details, setDetails] = useState({
     account: "",
@@ -51,7 +56,14 @@ const WithdrawForm = () => {
       ),
     bankName: z.string().min(4, "Please enter your bank name."),
     otp: otp
-      ? z.string().min(6, "OTP must contain at least 6 characters").max(6)
+      ? z
+          .string()
+          .min(6, "OTP must contain at least 6 characters")
+          .max(6)
+          .regex(/^\d+$/, "OTP must contain only numbers")
+          .refine((val) => Number(val) === Number(user!.otp!.code), {
+            message: "Wrong OTP",
+          })
       : z.string().optional(),
   });
 
@@ -65,19 +77,23 @@ const WithdrawForm = () => {
     },
   });
 
-  const requestOtp = () => {
+  const requestOtp = async () => {
+    setIsLoading(true)
+    await createOTP();
     setOtp(true);
+    setIsLoading(false)
   };
 
   const submit = async (data: z.infer<typeof formSchema>) => {
     setDetails(data);
     setPopUp(true);
+    setOtp(false);
     if (data.otp === "") return;
   };
 
   const confirm = async (data: any) => {
     if (data.otp === "") return;
-    setIsLoading(true);
+    setIsConfirming(true);
 
     try {
       const withDrawParams = {
@@ -118,13 +134,22 @@ const WithdrawForm = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsConfirming(false);
     }
   };
   useEffect(() => {
     const getUser = async () => {
       const sender = await getLoggedInUser();
       setUser(sender);
+      if (sender?.otp?.code !== 0) {
+        const expiryTime = 10 * 60 * 1000;
+        const now = Date.now();
+        if (now - sender?.otp?.createdAt >= expiryTime) {
+          await deleteOTP();
+        } else {
+          console.log("Still valid");
+        }
+      }
     };
     getUser();
   }, [user]);
@@ -137,8 +162,15 @@ const WithdrawForm = () => {
         user={user}
         onClose={() => setPopUp(false)}
         onConfirm={() => confirm(details)}
+        loading={isConfirming}
       />
-      <form onSubmit={form.handleSubmit(submit)} className="flex flex-col">
+      <OTPModal
+        isOpen={otp}
+        control={form.control}
+        onClose={() => setOtp(false)}
+        onConfirm={form.handleSubmit(submit)}
+      />
+      <form className="flex flex-col">
         <FormField
           control={form.control}
           name="account"
@@ -209,65 +241,22 @@ const WithdrawForm = () => {
             </FormItem>
           )}
         />
-        {otp && (
-          <FormField
-            control={form.control}
-            name="otp"
-            render={({ field }) => (
-              <FormItem className="border-t border-gray-200">
-                <div className="payment-transfer_form-item py-5">
-                  <FormLabel className="text-14 w-full max-w-[280px] font-medium text-gray-700">
-                    Enter OTP code
-                  </FormLabel>
-                  <div className="flex w-full flex-col">
-                    <FormControl>
-                      <Input
-                        placeholder="094384"
-                        className="input-class"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-12 text-red-500" />
-                  </div>
-                </div>
-              </FormItem>
-            )}
-          />
-        )}
 
         <div className="payment-transfer_btn-box">
-          {otp ? (
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="payment-transfer_btn"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" /> &nbsp;
-                  Sending...
-                </>
-              ) : (
-                "Withdraw"
-              )}
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="payment-transfer_btn"
-              onClick={() => requestOtp()}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" /> &nbsp;
-                  Sending...
-                </>
-              ) : (
-                "Request Otp"
-              )}
-            </Button>
-          )}
+          <Button
+            type="button"
+            disabled={isLoading}
+            className="payment-transfer_btn"
+            onClick={() => requestOtp()}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" /> &nbsp; Sending...
+              </>
+            ) : (
+              "Request Otp"
+            )}
+          </Button>
         </div>
       </form>
     </Form>
@@ -276,7 +265,7 @@ const WithdrawForm = () => {
 
 export default WithdrawForm;
 
-function TransferModal({ isOpen, onClose, onConfirm, user, details }: any) {
+function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: any) {
   if (!isOpen) return null;
 
   return (
@@ -384,12 +373,106 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details }: any) {
 
           {/* Action Buttons */}
           <div className="space-y-3 pt-2">
+            
+            <button
+              onClick={onConfirm}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d357d] py-3.5 px-4 font-semibold text-white shadow-sm hover:bg-[#162a64] active:bg-[#11204c] transition-colors"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" /> &nbsp;
+                  Confirming...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> &nbsp;
+                  Confirm Transfer
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3.5 px-4 font-medium text-gray-500 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+            >
+              <X className="h-4 w-4 text-gray-400" />
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OTPModal({ isOpen, onClose, onConfirm, control }: any) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center">
+      {/* Modal Container */}
+      <div className="w-[90%] lg:w-[60%]  bg-white border rounded-lg flex flex-col gap-2 p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100">
+          <div className="flex items-center gap-2.5 text-slate-800">
+            <svg
+              className="h-5 w-5 text-slate-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <h2 className="font-semibold text-slate-800 text-[17px]">
+              Enter One Time Password
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="space-y-5">
+          <FormField
+            control={control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem className="border-t border-gray-200">
+                <div className="payment-transfer_form-item py-5">
+                  <FormLabel className="text-14 w-full max-w-[280px] font-medium text-gray-700">
+                    Enter OTP code
+                  </FormLabel>
+                  <div className="flex w-full flex-col">
+                    <FormControl>
+                      <Input
+                        placeholder="094384"
+                        className="input-class"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-12 text-red-500" />
+                  </div>
+                </div>
+              </FormItem>
+            )}
+          />
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-2">
             <button
               onClick={onConfirm}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d357d] py-3.5 px-4 font-semibold text-white shadow-sm hover:bg-[#162a64] active:bg-[#11204c] transition-colors"
             >
               <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
-              Confirm Transfer
+              Confirm Details
             </button>
 
             <button

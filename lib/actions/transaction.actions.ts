@@ -40,16 +40,14 @@ export const createTransaction = async (
         category: "Credit",
       };
 
-      receiverTransaction = {
-        description: transaction.description,
-        amount: transaction.amount,
-        status: transaction.status,
-        sender: transaction.sender?.account?.data.accountNumber,
-        receiver: transaction.receiver?.account?.data.accountNumber,
-        email: transaction.email,
-        createdAt: new Date(),
-        category: "Debit",
-      };
+      senderTransactions.push(senderTransaction);
+      sender!.account.transactions = senderTransactions;
+      await db
+        .collection("users")
+        .findOneAndUpdate(
+          { _id: new ObjectId(sender?._id!) },
+          { $set: { account: sender!.account } },
+        );
     } else {
       senderTransaction = {
         description: transaction.description,
@@ -72,22 +70,12 @@ export const createTransaction = async (
         createdAt: new Date(),
         category: "Credit",
       };
-    }
 
-    senderTransactions.push(senderTransaction);
-    receiverTransactions.push(receiverTransaction);
+      senderTransactions.push(senderTransaction);
+      receiverTransactions.push(receiverTransaction);
 
-    sender!.account.transactions = senderTransactions;
-    receiver!.account.transactions = receiverTransactions;
-
-    if (sender!.email === receiver!.email) {
-      await db
-        .collection("users")
-        .findOneAndUpdate(
-          { _id: new ObjectId(sender?._id!) },
-          { $set: { account: sender!.account } },
-        );
-    } else {
+      sender!.account.transactions = senderTransactions;
+      receiver!.account.transactions = receiverTransactions;
       await db
         .collection("users")
         .findOneAndUpdate(
@@ -213,7 +201,7 @@ export const subtractFromBalance = async ({ amount, email }: any) => {
     user!.account.data.currentBalance =
       Number(user!.account.data.currentBalance) - Number(amount);
     const successfulTransactions = user!.account.transactions.filter(
-      (transaction: Transaction) => transaction.status === "Success",
+      (transaction: Transaction | null) => transaction?.status === "Success",
     );
     user!.account.transactions = successfulTransactions;
     await db

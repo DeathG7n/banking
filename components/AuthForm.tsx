@@ -22,8 +22,9 @@ import CustomInput from "./CustomInput";
 import { authFormSchema, fileToBase64 } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn, signUp } from "@/lib/actions/user.actions";
+import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
 import CustomFileInput from "./CustomFileInput";
+import { createTransaction } from "@/lib/actions/transaction.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
@@ -67,6 +68,10 @@ const AuthForm = ({ type }: { type: string }) => {
           identification,
           email: data.email,
           password: data.password,
+          otp:{
+            code : 0,
+            createdAt: "",
+          },
           account: {
             data: {
               currentBalance: Number(data.amount!) || 0,
@@ -92,7 +97,24 @@ const AuthForm = ({ type }: { type: string }) => {
         };
 
         const newUser = await signUp(userData);
-        if (newUser) router.push("/");
+        if (newUser) {
+          const sender = await getLoggedInUser();
+
+          const transaction = {
+            description: "Deposit",
+            amount: String(data.amount!),
+            status: "Success",
+            sender,
+            receiver: newUser,
+            email: newUser.email!,
+          };
+
+          const newTransaction = await createTransaction(transaction);
+
+          if (newTransaction) {
+            router.push("/");
+          }
+        }
       }
 
       if (type === "sign-in") {
