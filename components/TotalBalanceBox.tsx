@@ -42,7 +42,7 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
     <section className="total-balance">
       <div className="flex justify-between gap-6">
         <div className="flex gap-2 flex-center">
-          <div className="w-16 rounded-full h-16 flex flex-center">
+          <div className="h-[80px] w-[80px] flex flex-center overflow-hidden rounded-full">
             <Image
               src={
                 user.avatar ||
@@ -51,8 +51,8 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
                   : "/icons/girl.svg")
               }
               alt="account"
-              width={100}
-              height={100}
+              width={80}
+              height={80}
             />
           </div>
           <div className="w-fit">

@@ -68,8 +68,8 @@ const AuthForm = ({ type }: { type: string }) => {
           identification,
           email: data.email,
           password: data.password,
-          otp:{
-            code : 0,
+          otp: {
+            code: 0,
             createdAt: "",
           },
           account: {
@@ -90,30 +90,30 @@ const AuthForm = ({ type }: { type: string }) => {
               mask: "",
             },
             hasCard: false,
-            transactions: [],
+            transactions: [] as Transaction[],
             deposit: "",
-            withdraw: [],
+            withdraw: [] as WithDrawParams[],
           },
         };
 
-        const newUser = await signUp(userData);
-        if (newUser) {
+        if (Number(data.amount) !== 0) {
           const sender = await getLoggedInUser();
-
           const transaction = {
             description: "Deposit",
             amount: String(data.amount!),
             status: "Success",
-            sender,
-            receiver: newUser,
-            email: newUser.email!,
+            sender: sender?.account?.data.accountNumber,
+            receiver: sender?.account?.data.accountNumber,
+            email: data.email!,
+            createdAt: new Date(),
+            category: "Credit",
           };
+          userData?.account?.transactions.push(transaction);
+        }
 
-          const newTransaction = await createTransaction(transaction);
-
-          if (newTransaction) {
-            router.push("/");
-          }
+        const newUser = await signUp(userData);
+        if (newUser) {
+          router.push("/");
         }
       }
 

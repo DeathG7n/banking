@@ -99,25 +99,14 @@ declare type Data = {
 };
 
 declare type Transaction = {
-  id: string;
-  $id: string;
   description: string;
-  paymentChannel: string;
-  type: string;
-  accountId: string;
-  amount: number;
-  pending: boolean;
-  category: string;
-  date: string;
-  image: string;
-  type: string;
-  createdAt: string;
-  channel: string;
-  senderBankId: string;
-  receiverBankId: string;
-  sender: User;
-  receiver: User;
+  amount: string;
   status: string;
+  sender: number | undefined;
+  receiver: number | undefined;
+  email: string;
+  createdAt: Date;
+  category: string;
 };
 
 declare type Bank = {
