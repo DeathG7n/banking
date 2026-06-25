@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import CustomInput from "./CustomInput";
+import Response from "./Response";
 import { authFormSchema, fileToBase64 } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,9 @@ const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(false)
 
   const formSchema = authFormSchema(type);
 
@@ -113,6 +117,9 @@ const AuthForm = ({ type }: { type: string }) => {
 
         const newUser = await signUp(userData);
         if (newUser) {
+          setShowPopup(true);
+          setError(false)
+          setMessage("User created successfully");
           router.push("/");
         }
       }
@@ -124,18 +131,37 @@ const AuthForm = ({ type }: { type: string }) => {
         });
 
         if (response) {
+          setShowPopup(true);
+          setError(false)
+          setMessage("Welcome");
           router.push("/");
         }
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
+      if (error instanceof Error) {
+        setShowPopup(true);
+        setError(true)
+        setMessage(error.message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    if (!showPopup) return;
+
+    const timer = setTimeout(() => {
+      setShowPopup(false);
+      setError(false)
+    }, 5000); // 5 seconds
+
+    return () => clearTimeout(timer);
+  }, [showPopup]);
 
   return (
     <section className="auth-form">
+      {showPopup && <Response message={message} error = {error}/>}
       <header className="flex flex-col gap-5 md:gap-8">
         <Link href="/" className="cursor-pointer flex items-center gap-1">
           <Image
