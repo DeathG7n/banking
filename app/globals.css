@@ -130,7 +130,7 @@
   }
 
   .total-balance {
-    @apply flex flex-col w-full  gap-4 rounded-xl border border-gray-200 p-4 shadow-chart bg-bank-green-gradient bg-cover bg-no-repeat sm:gap-6 sm:p-6;
+    @apply flex flex-col w-full text-white gap-4 rounded-xl border border-gray-200 p-4 shadow-chart bg-[url('/images/bank-hero.jpg')] bg-cover bg-center sm:gap-6 sm:p-6;
   }
 
   .total-balance-chart {
@@ -288,7 +288,7 @@
 
   /* Auth Form */
   .auth-form {
-    @apply flex min-h-screen w-full max-w-[420px] flex-col justify-center gap-5 py-10 md:gap-8;
+    @apply flex min-h-screen w-full max-w-[420px] flex-col justify-center gap-5 py-10 md:gap-8 ;
   }
 
   .form-item {
@@ -296,7 +296,7 @@
   }
  
   .form-label {
-    @apply text-14 w-full max-w-[280px] font-medium text-gray-700;
+    @apply text-14 w-full max-w-[280px] font-medium text-white;
   }
 
   .form-message {

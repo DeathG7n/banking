@@ -6,7 +6,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex min-h-screen w-full justify-between font-inter">
+    <main className="flex min-h-screen w-full justify-between font-inter bg-[url('/images/bank-hero.jpg')] bg-fixed">
       {children}
       <div className="auth-asset">
         <div>

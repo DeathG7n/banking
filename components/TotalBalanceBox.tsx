@@ -56,8 +56,8 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
             />
           </div>
           <div className="w-fit">
-            <h1 className="text-10 lg:text-16 text-gray-700">{greeting}</h1>
-            <h1 className="header-1">{user?.account?.data.firstName}</h1>
+            <h1 className="text-10 lg:text-16 text-white">{greeting}</h1>
+            <h1 className="text-18 font-semibold text-white">{user?.account?.data.firstName}</h1>
           </div>
         </div>
         <div className="flex flex-col">
@@ -76,7 +76,7 @@ const TotalBalanceBox = ({ user }: TotalBalanceBoxProps) => {
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <h2 className="header-2">Available Balance:</h2>
+        <h2 className="text-16 font-semibold text-white">Available Balance:</h2>
         <AnimatedCounter amount={Number(user?.account?.data.currentBalance)} />
       </div>
       <div className="flex flex-col lg:flex-row gap-6 lg:justify-between p-3 bg-white/20 backdrop-blur-md  border-white/30 rounded-xl">
