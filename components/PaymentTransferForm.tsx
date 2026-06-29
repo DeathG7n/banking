@@ -145,7 +145,7 @@ const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
     );
 
     setRecipient(receiver?.account?.data?.name);
-  }, [receiverBankValue]);
+  }, [receiverBankValue, users]);
 
   return (
     <Form {...form}>

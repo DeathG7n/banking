@@ -1,4 +1,5 @@
 import { logoutAccount } from "@/lib/actions/user.actions";
+import { truncate } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -27,7 +28,7 @@ const Footer = ({ user, type = "desktop" }: FooterProps) => {
           {user?.firstName}
         </h1>
         <p className="text-10 truncate font-normal text-gray-600">
-          {user?.email}
+          {truncate(user?.email, 12)}
         </p>
       </div>
 
