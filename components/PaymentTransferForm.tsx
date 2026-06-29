@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm , useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import {
@@ -17,7 +17,6 @@ import {
   getLoggedInUser,
   getUsers,
 } from "@/lib/actions/user.actions";
-
 
 import { BankDropdown } from "./BankDropdown";
 import { Button } from "./ui/button";
@@ -32,49 +31,54 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { TransferLedgerSweepSimulateEventType } from "plaid";
-
-let activeAccounts: string[] = [];
-let users: User[] = [];
-let user: User;
-
-const formSchema = z
-  .object({
-    email: z.string().email("Invalid email address"),
-    name: z.string().min(4, "Transfer note is too short"),
-    amount: z
-      .string()
-      .min(1, "Amount is too short")
-      .refine((val) => Number(val) <= Number(user!.account!.data!.currentBalance), {
-        message: "Amount is greater than account balance",
-      }),
-    senderBank: z.string().min(4, "Please select a valid bank account"),
-    receiverBank: z
-      .string()
-      .min(8, "Please enter a valid bank account")
-      .refine((val) => activeAccounts.includes(val as any), {
-        message: "Bank account doesn't exists",
-      }),
-  })
-  .refine((data) => data.senderBank !== data.receiverBank, {
-    message: "Can't send to same account",
-    path: ["receiverBank"], // Highlights the error specifically on this field
-  });
 
 const PaymentTransferForm = ({ account }: PaymentTransferFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [recipient, setRecipient] = useState<string>();
+  const [user, setUser] = useState<User | null>(null);
+  const [activeAccounts, setActiveAccounts] = useState<string[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  const formSchema = z
+    .object({
+      email: z.string().email("Invalid email address"),
+      name: z.string().min(4, "Transfer note is too short"),
+      amount: z
+        .string()
+        .min(1, "Amount is too short")
+        .refine(
+          (val) => Number(val) <= Number(user!.account!.data!.currentBalance),
+          {
+            message: "Amount is greater than account balance",
+          },
+        ),
+      senderBank: z.string().min(4, "Please select a valid bank account"),
+      receiverBank: z
+        .string()
+        .min(8, "Please enter a valid bank account")
+        .refine((val) => activeAccounts.includes(val as any), {
+          message: "Bank account doesn't exists",
+        }),
+    })
+    .refine((data) => data.senderBank !== data.receiverBank, {
+      message: "Can't send to same account",
+      path: ["receiverBank"], // Highlights the error specifically on this field
+    });
 
   useEffect(() => {
-    const getAccounts = async () => {
-      user = await getLoggedInUser();
-      activeAccounts = await getActiveAccounts();
-      users = await getUsers();
-    };
+    async function loadData() {
+      setUser(await getLoggedInUser());
+      setActiveAccounts(await getActiveAccounts());
+      setUsers(await getUsers());
+      if (!user) {
+        router.push("/sign-in");
+        return;
+      }
+    }
 
-    getAccounts();
-  }, []);
+    loadData();
+  }, [router, user]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

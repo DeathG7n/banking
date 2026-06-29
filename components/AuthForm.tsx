@@ -33,7 +33,7 @@ const AuthForm = ({ type }: { type: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState(false)
+  const [error, setError] = useState(false);
 
   const formSchema = authFormSchema(type);
 
@@ -115,11 +115,13 @@ const AuthForm = ({ type }: { type: string }) => {
           userData?.account?.transactions.push(transaction);
         }
 
-        const newUser = await signUp(userData);
-        if (newUser) {
-          setShowPopup(true);
-          setError(false)
-          setMessage("User created successfully");
+        const response = await signUp(userData);
+
+        setShowPopup(true);
+        setError(!response.success);
+        setMessage(response.message);
+
+        if (response.success) {
           router.push("/");
         }
       }
@@ -130,20 +132,16 @@ const AuthForm = ({ type }: { type: string }) => {
           password: data.password,
         });
 
-        if (response) {
-          setShowPopup(true);
-          setError(false)
-          setMessage("Welcome");
+        setShowPopup(true);
+        setError(!response.success);
+        setMessage(response.message);
+
+        if (response.success) {
           router.push("/");
         }
       }
     } catch (error) {
-      console.log(error)
-      if (error instanceof Error) {
-        setShowPopup(true);
-        setError(true)
-        setMessage(error.message);
-      }
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +151,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
     const timer = setTimeout(() => {
       setShowPopup(false);
-      setError(false)
+      setError(false);
     }, 5000); // 5 seconds
 
     return () => clearTimeout(timer);
@@ -161,7 +159,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
   return (
     <section className="auth-form">
-      {showPopup && <Response message={message} error = {error}/>}
+      {showPopup && <Response message={message} error={error} />}
       <header className="flex flex-col gap-5 md:gap-8">
         <Link href="/" className="cursor-pointer flex items-center gap-1">
           <Image

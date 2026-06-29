@@ -8,32 +8,43 @@ import { createAccountNumber } from "./bank.actions";
 export const signIn = async ({ email, password }: signInProps) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
-  await client.connect();
-  const db = client.db("banking");
-  const users = db.collection<User>("users");
 
   try {
-    const user = await users.findOne({
-      email: email,
-    });
+    await client.connect();
+
+    const db = client.db("banking");
+    const users = db.collection<User>("users");
+
+    const user = await users.findOne({ email });
 
     if (!user) {
-      throw new Error("User doesn't exists");
-    } else {
-      if (user?.password !== password) {
-        throw new Error("Wrong Password");
-      } else {
-        cookies().set("user-id", user._id.toString(), {
-          path: "/",
-          httpOnly: true,
-          sameSite: "strict",
-          secure: true,
-        });
-        return parseStringify(user);
-      }
+      return {
+        success: false,
+        message: "User doesn't exist",
+        user: null,
+      };
     }
-  } catch (error) {
-    throw error;
+
+    if (user.password !== password) {
+      return {
+        success: false,
+        message: "Wrong password",
+        user: null,
+      };
+    }
+
+    cookies().set("user-id", user._id.toString(), {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return {
+      success: true,
+      message: "Welcome",
+      user: parseStringify(user),
+    };
   } finally {
     await client.close();
   }
@@ -42,40 +53,43 @@ export const signIn = async ({ email, password }: signInProps) => {
 export const signUp = async (userData: SignUpParams) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
-  await client.connect();
-  const db = client.db("banking");
-  const users = db.collection<User>("users");
 
   try {
+    await client.connect();
+
+    const db = client.db("banking");
+    const users = db.collection<User>("users");
+
     const existingUser = await users.findOne({
       email: userData.email,
     });
 
     if (existingUser) {
-      throw new Error("User already exists");
+      return {
+        success: false,
+        message: "User already exists",
+        user: null,
+      };
     }
-    
+
     const user = {
       ...userData,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
     const newUser = await users.insertOne(user);
 
-    // cookies().set("user-email", userData.email, {
-    //   path: "/",
-    //   httpOnly: true,
-    //   sameSite: "strict",
-    //   secure: true,
-    // });
-
-    return parseStringify(newUser);
-  } catch (error) {
-    throw error;
+    return {
+      success: true,
+      message: "User created successfully",
+      user: parseStringify(newUser),
+    };
   } finally {
     await client.close();
   }
 };
+
 export const createUser = async (userData: CreateUser) => {
   const uri = process.env.MONGODB_URI;
   const client = new MongoClient(uri!);
