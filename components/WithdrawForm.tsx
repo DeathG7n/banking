@@ -66,10 +66,9 @@ const WithdrawForm = () => {
           .min(6, "OTP must be 6 digits")
           .max(6, "OTP must be 6 digits")
           .regex(/^\d+$/, "OTP must contain only numbers")
-          .refine(
-            (val) => Number(val) === Number(user?.otp?.code),
-            { message: "Wrong OTP" },
-          )
+          .refine((val) => Number(val) === Number(user?.otp?.code), {
+            message: "Wrong OTP",
+          })
       : z.string().optional(),
   });
 
@@ -83,7 +82,6 @@ const WithdrawForm = () => {
     },
   });
 
-  // Load user once on mount
   useEffect(() => {
     const loadUser = async () => {
       const sender = await getLoggedInUser();
@@ -105,7 +103,6 @@ const WithdrawForm = () => {
   }, []);
 
   const requestOtp = async () => {
-    // Validate main fields first
     const valid = await form.trigger(["account", "amount", "bankName"]);
     if (!valid) return;
 
@@ -113,7 +110,7 @@ const WithdrawForm = () => {
     try {
       const updatedUser = await createOTP();
       if (updatedUser) {
-        setUser(updatedUser); // refresh OTP in state so validation works
+        setUser(updatedUser);
         setShowOtpModal(true);
       } else {
         alert("Failed to send OTP. Please try again.");
@@ -126,7 +123,6 @@ const WithdrawForm = () => {
     }
   };
 
-  // Called when user confirms OTP in the OTP modal
   const onOtpSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!data.otp) {
       alert("Please enter the OTP");
@@ -137,7 +133,6 @@ const WithdrawForm = () => {
     setShowConfirmModal(true);
   };
 
-  // Called when user confirms the transfer in the confirm modal
   const confirmTransfer = async () => {
     if (!details.otp) {
       alert("OTP is required");
@@ -154,14 +149,18 @@ const WithdrawForm = () => {
       };
 
       const withdraw = await createWithdraw(withDrawParams);
-
       if (!withdraw) {
         alert("Failed to process withdrawal");
         return;
       }
 
       const sender = await getLoggedInUser();
-      if (!sender) {
+      console.log("LOGGED IN USER:", {
+        email: sender?.email,
+        balance: sender?.account?.data?.currentBalance,
+      });
+
+      if (!sender?.email) {
         alert("Session expired. Please sign in again.");
         router.push("/sign-in");
         return;
@@ -172,10 +171,12 @@ const WithdrawForm = () => {
         email: sender.email,
       });
 
-      console.log("subtractFromBalance result:", update);
+      console.log("BALANCE UPDATE RESULT:", update ? "OK" : "FAILED");
 
       if (!update) {
-        alert("Failed to update balance. Check server logs or try again.");
+        alert(
+          "Failed to update balance. Check server logs (email / balance / account).",
+        );
         return;
       }
 

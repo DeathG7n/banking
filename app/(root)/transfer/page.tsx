@@ -2,11 +2,9 @@ import HeaderBox from "@/components/HeaderBox";
 import WithdrawForm from "@/components/WithdrawForm";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
-import React from "react";
 
 const Withdraw = async () => {
   const loggedIn = await getLoggedInUser();
-
   if (!loggedIn) redirect("/sign-in");
 
   return (
@@ -15,7 +13,6 @@ const Withdraw = async () => {
         title="Transfer"
         subtext="Please provide details for your payment"
       />
-
       <section className="size-full pt-5">
         <WithdrawForm />
       </section>

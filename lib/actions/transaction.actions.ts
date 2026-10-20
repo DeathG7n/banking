@@ -48,7 +48,7 @@ export const createTransaction = async (
         receiver: transaction.receiver?.account?.data?.accountNumber,
         email: transaction.email,
         createdAt: new Date(),
-        category: "Credit",
+        category: "Debit",
       };
 
       senderTransactions.push(senderTransaction);
@@ -94,7 +94,6 @@ export const createTransaction = async (
 
       senderTransactions.push(senderTransaction);
       receiverTransactions.push(receiverTransaction);
-
       sender.account.transactions = senderTransactions;
       receiver.account.transactions = receiverTransactions;
 
@@ -112,11 +111,10 @@ export const createTransaction = async (
         );
     }
 
-    const transactions = {
+    return parseStringify({
       sender: senderTransaction,
       receiver: receiverTransaction,
-    };
-    return parseStringify(transactions);
+    });
   } catch (error) {
     console.log("createTransaction error:", error);
     return null;
@@ -134,13 +132,11 @@ export const getTransactionsByAccountId = async ({
   const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
-  const users = db.collection<User>("users");
 
   try {
-    const user = await users.findOne({
+    const user = await db.collection<User>("users").findOne({
       _id: new ObjectId(accountId),
     });
-
     if (!user?.account?.transactions) return [];
     return parseStringify(user.account.transactions);
   } catch (error) {
@@ -198,11 +194,7 @@ export const createTransfer = async ({ ...transferParams }: TransferParams) => {
         { $set: { account: transferParams.receiver } },
       );
 
-    const transfer = {
-      sender,
-      receiver,
-    };
-    return parseStringify(transfer);
+    return parseStringify({ sender, receiver });
   } catch (error) {
     console.log("createTransfer error:", error);
     return null;
@@ -213,30 +205,51 @@ export const createTransfer = async ({ ...transferParams }: TransferParams) => {
 
 export const addToBalance = async ({ amount, email }: any) => {
   const uri = process.env.MONGODB_URI;
-  if (!uri) return null;
+  if (!uri) {
+    console.log("addToBalance: MONGODB_URI missing");
+    return null;
+  }
 
   const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
 
   try {
-    const users = await db.collection("users").find({}).toArray();
-    const user = users.find((u) => u?.email === email);
-
-    if (!user?.account?.data) {
-      console.log("addToBalance: user or account not found for", email);
+    if (!email) {
+      console.log("addToBalance: email empty");
       return null;
     }
 
-    user.account.data.currentBalance =
+    const user = await db.collection("users").findOne({ email });
+    if (!user?.account?.data) {
+      console.log("addToBalance: user/account missing for", email);
+      return null;
+    }
+
+    const newBalance =
       Number(user.account.data.currentBalance) + Number(amount);
-    user.account.deposit = "";
 
-    await db
-      .collection("users")
-      .findOneAndUpdate({ email }, { $set: { account: user.account } });
+    const updateResult = await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          "account.data.currentBalance": newBalance,
+          "account.deposit": "",
+        },
+      },
+    );
 
-    return parseStringify(user);
+    console.log(
+      "addToBalance matched:",
+      updateResult.matchedCount,
+      "modified:",
+      updateResult.modifiedCount,
+    );
+
+    if (updateResult.matchedCount === 0) return null;
+
+    const updated = await db.collection("users").findOne({ email });
+    return parseStringify(updated);
   } catch (error) {
     console.log("addToBalance error:", error);
     return null;
@@ -247,41 +260,81 @@ export const addToBalance = async ({ amount, email }: any) => {
 
 export const subtractFromBalance = async ({ amount, email }: any) => {
   const uri = process.env.MONGODB_URI;
-  if (!uri) return null;
+  if (!uri) {
+    console.log("subtractFromBalance: MONGODB_URI missing");
+    return null;
+  }
 
   const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
 
   try {
-    const users = await db.collection("users").find({}).toArray();
-    const user = users.find((u) => u?.email === email);
+    console.log(
+      "subtractFromBalance called with email:",
+      email,
+      "amount:",
+      amount,
+    );
 
-    if (!user?.account?.data) {
-      console.log("subtractFromBalance: user or account not found for", email);
+    if (!email) {
+      console.log("subtractFromBalance: email empty");
+      return null;
+    }
+
+    const withdrawAmount = Number(amount);
+    if (!Number.isFinite(withdrawAmount) || withdrawAmount <= 0) {
+      console.log("subtractFromBalance: invalid amount", amount);
+      return null;
+    }
+
+    const user = await db.collection("users").findOne({ email });
+
+    if (!user) {
+      console.log("subtractFromBalance: NO USER for email:", email);
+      return null;
+    }
+
+    if (!user.account?.data) {
+      console.log("subtractFromBalance: no account.data for", email);
       return null;
     }
 
     const currentBalance = Number(user.account.data.currentBalance);
-    const withdrawAmount = Number(amount);
+    console.log("subtractFromBalance: currentBalance =", currentBalance);
 
     if (withdrawAmount > currentBalance) {
       console.log("subtractFromBalance: insufficient funds");
       return null;
     }
 
-    user.account.data.currentBalance = currentBalance - withdrawAmount;
+    const newBalance = currentBalance - withdrawAmount;
 
-    // Ensure transactions is always an array — do not wipe existing ones
-    if (!Array.isArray(user.account.transactions)) {
-      user.account.transactions = [];
+    const updateResult = await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          "account.data.currentBalance": newBalance,
+        },
+      },
+    );
+
+    console.log(
+      "subtractFromBalance matched:",
+      updateResult.matchedCount,
+      "modified:",
+      updateResult.modifiedCount,
+      "newBalance:",
+      newBalance,
+    );
+
+    if (updateResult.matchedCount === 0) {
+      console.log("subtractFromBalance: update matched 0 docs");
+      return null;
     }
 
-    await db
-      .collection("users")
-      .findOneAndUpdate({ email }, { $set: { account: user.account } });
-
-    return parseStringify(user);
+    const updated = await db.collection("users").findOne({ email });
+    return parseStringify(updated);
   } catch (error) {
     console.log("subtractFromBalance error:", error);
     return null;
