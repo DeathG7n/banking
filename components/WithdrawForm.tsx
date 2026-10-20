@@ -46,7 +46,6 @@ const WithdrawForm = () => {
   });
   const [user, setUser] = useState<User | null>(null);
 
-  // Schema depends on whether OTP modal is open and current user OTP
   const formSchema = z.object({
     account: z.string().min(8, "Account number must be at least 8 characters"),
     amount: z
@@ -106,7 +105,7 @@ const WithdrawForm = () => {
   }, []);
 
   const requestOtp = async () => {
-    // Validate the main fields first
+    // Validate main fields first
     const valid = await form.trigger(["account", "amount", "bankName"]);
     if (!valid) return;
 
@@ -156,45 +155,47 @@ const WithdrawForm = () => {
 
       const withdraw = await createWithdraw(withDrawParams);
 
-      if (withdraw) {
-        const sender = await getLoggedInUser();
-        if (!sender) {
-          alert("Session expired. Please sign in again.");
-          router.push("/sign-in");
-          return;
-        }
-
-        const update = await subtractFromBalance({
-          amount: details.amount,
-          email: sender.email,
-        });
-
-        if (update) {
-          const transaction = {
-            description: "Withdraw",
-            amount: String(details.amount),
-            status: "Success",
-            sender,
-            receiver: sender,
-            email: sender.email,
-          };
-
-          const newTransaction = await createTransaction(transaction);
-
-          if (newTransaction) {
-            await deleteOTP(); // clear OTP after success
-            form.reset();
-            setShowConfirmModal(false);
-            router.push("/");
-            router.refresh();
-          } else {
-            alert("Failed to create transaction");
-          }
-        } else {
-          alert("Failed to update balance");
-        }
-      } else {
+      if (!withdraw) {
         alert("Failed to process withdrawal");
+        return;
+      }
+
+      const sender = await getLoggedInUser();
+      if (!sender) {
+        alert("Session expired. Please sign in again.");
+        router.push("/sign-in");
+        return;
+      }
+
+      const update = await subtractFromBalance({
+        amount: details.amount,
+        email: sender.email,
+      });
+
+      if (!update) {
+        alert("Failed to update balance. Check server logs or try again.");
+        return;
+      }
+
+      const transaction = {
+        description: "Withdraw",
+        amount: String(details.amount),
+        status: "Success",
+        sender,
+        receiver: sender,
+        email: sender.email,
+      };
+
+      const newTransaction = await createTransaction(transaction);
+
+      if (newTransaction) {
+        await deleteOTP();
+        form.reset();
+        setShowConfirmModal(false);
+        router.push("/");
+        router.refresh();
+      } else {
+        alert("Failed to create transaction");
       }
     } catch (error) {
       console.error(error);
