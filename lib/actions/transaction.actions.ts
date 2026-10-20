@@ -18,26 +18,21 @@ export const createTransaction = async (
       description: transaction?.description,
       amount: transaction?.amount,
       email: transaction?.email,
-      senderAccount:
-        transaction?.sender?.account?.data?.accountNumber,
-      receiverAccount:
-        transaction?.receiver?.account?.data?.accountNumber,
+      bankName: transaction?.bankName,
+      remark: transaction?.remark,
     });
 
-    // Prefer email lookup (most reliable)
     let sender = transaction?.email
       ? await db.collection("users").findOne({ email: transaction.email })
       : null;
 
-    // Fallback: match by account number (with Number() so types match)
     if (!sender && transaction?.sender?.account?.data?.accountNumber != null) {
-      const senderAcc = Number(
-        transaction.sender.account.data.accountNumber,
-      );
+      const senderAcc = Number(transaction.sender.account.data.accountNumber);
       const users = await db.collection("users").find({}).toArray();
-      sender = users.find(
-        (u) => Number(u?.account?.data?.accountNumber) === senderAcc,
-      ) ?? null;
+      sender =
+        users.find(
+          (u) => Number(u?.account?.data?.accountNumber) === senderAcc,
+        ) ?? null;
     }
 
     if (!sender?.account) {
@@ -65,9 +60,14 @@ export const createTransaction = async (
         email: transaction.email,
         createdAt: new Date(),
         category: "Debit",
+        bankName: transaction.bankName || "",
+        accountType: transaction.accountType || "Online Banking",
+        recipientName: transaction.recipientName || "",
+        remark: transaction.remark || "",
       };
 
-      sender.account.transactions.push(senderTransaction);
+      // Newest first
+      sender.account.transactions.unshift(senderTransaction);
 
       const updateResult = await db.collection("users").updateOne(
         { _id: sender._id },
@@ -83,7 +83,6 @@ export const createTransaction = async (
 
       if (updateResult.matchedCount === 0) return null;
     } else {
-      // Transfer between two accounts
       let receiver = null;
 
       if (transaction?.receiver?.account?.data?.accountNumber != null) {
@@ -91,9 +90,10 @@ export const createTransaction = async (
           transaction.receiver.account.data.accountNumber,
         );
         const users = await db.collection("users").find({}).toArray();
-        receiver = users.find(
-          (u) => Number(u?.account?.data?.accountNumber) === receiverAcc,
-        ) ?? null;
+        receiver =
+          users.find(
+            (u) => Number(u?.account?.data?.accountNumber) === receiverAcc,
+          ) ?? null;
       }
 
       if (!receiver?.account) {
@@ -114,6 +114,10 @@ export const createTransaction = async (
         email: transaction.email,
         createdAt: new Date(),
         category: "Debit",
+        bankName: transaction.bankName || "",
+        accountType: transaction.accountType || "Online Banking",
+        recipientName: transaction.recipientName || "",
+        remark: transaction.remark || "",
       };
 
       receiverTransaction = {
@@ -125,10 +129,14 @@ export const createTransaction = async (
         email: transaction.email,
         createdAt: new Date(),
         category: "Credit",
+        bankName: transaction.bankName || "",
+        accountType: transaction.accountType || "Online Banking",
+        recipientName: transaction.recipientName || "",
+        remark: transaction.remark || "",
       };
 
-      sender.account.transactions.push(senderTransaction);
-      receiver.account.transactions.push(receiverTransaction);
+      sender.account.transactions.unshift(senderTransaction);
+      receiver.account.transactions.unshift(receiverTransaction);
 
       await db.collection("users").updateOne(
         { _id: sender._id },
@@ -166,8 +174,15 @@ export const getTransactionsByAccountId = async ({
     const user = await db.collection<User>("users").findOne({
       _id: new ObjectId(accountId),
     });
+
     if (!user?.account?.transactions) return [];
-    return parseStringify(user.account.transactions);
+
+    const sorted = [...user.account.transactions].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    return parseStringify(sorted);
   } catch (error) {
     console.log("getTransactionsByAccountId error:", error);
     return null;
@@ -189,13 +204,13 @@ export const createTransfer = async ({ ...transferParams }: TransferParams) => {
 
     const sender = users.find(
       (user) =>
-        user?.account?.data?.accountNumber ===
-        transferParams.sender?.data?.accountNumber,
+        Number(user?.account?.data?.accountNumber) ===
+        Number(transferParams.sender?.data?.accountNumber),
     );
     const receiver = users.find(
       (user) =>
-        user?.account?.data?.accountNumber ===
-        transferParams.receiver?.data?.accountNumber,
+        Number(user?.account?.data?.accountNumber) ===
+        Number(transferParams.receiver?.data?.accountNumber),
     );
 
     if (!sender?._id || !receiver?._id) {
@@ -210,18 +225,14 @@ export const createTransfer = async ({ ...transferParams }: TransferParams) => {
       Number(transferParams.receiver.data.currentBalance) +
       Number(transferParams.amount);
 
-    await db
-      .collection("users")
-      .findOneAndUpdate(
-        { _id: new ObjectId(sender._id) },
-        { $set: { account: transferParams.sender } },
-      );
-    await db
-      .collection("users")
-      .findOneAndUpdate(
-        { _id: new ObjectId(receiver._id) },
-        { $set: { account: transferParams.receiver } },
-      );
+    await db.collection("users").updateOne(
+      { _id: sender._id },
+      { $set: { account: transferParams.sender } },
+    );
+    await db.collection("users").updateOne(
+      { _id: receiver._id },
+      { $set: { account: transferParams.receiver } },
+    );
 
     return parseStringify({ sender, receiver });
   } catch (error) {

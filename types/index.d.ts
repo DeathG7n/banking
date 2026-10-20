@@ -107,6 +107,10 @@ declare type Transaction = {
   email: string;
   createdAt: Date;
   category: string;
+  bankName?: string;
+  accountType?: string;
+  recipientName?: string;
+  remark?: string;
 };
 
 declare type Bank = {
@@ -334,6 +338,10 @@ declare interface CreateTransactionProps {
   sender: User;
   receiver: User;
   email: string;
+  bankName?: string;
+  accountType?: string;
+  recipientName?: string;
+  remark?: string;
 }
 
 declare interface getTransactionsByAccountIdProps {

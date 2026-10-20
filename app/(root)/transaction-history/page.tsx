@@ -3,25 +3,35 @@ import { Pagination } from "@/components/Pagination";
 import TransactionsTable from "@/components/TransactionsTable";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { formatAmount } from "@/lib/utils";
-import React from "react";
+import { redirect } from "next/navigation";
 
 const TransactionHistory = async ({
-  searchParams: { id, page },
+  searchParams: { page },
 }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
+
+  if (!loggedIn) redirect("/sign-in");
+
   const account = loggedIn.account;
 
+  // Newest → oldest
+  const sortedTransactions = [...(account?.transactions || [])].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
   const rowsPerPage = 10;
-  const totalPages = Math.ceil(account?.transactions?.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedTransactions.length / rowsPerPage) || 1;
 
   const indexOfLastTransaction = currentPage * rowsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - rowsPerPage;
 
-  const currentTransactions = account?.transactions?.slice(
+  const currentTransactions = sortedTransactions.slice(
     indexOfFirstTransaction,
     indexOfLastTransaction,
   );
+
   return (
     <div className="transactions">
       <div className="transactions-header">
@@ -35,18 +45,18 @@ const TransactionHistory = async ({
         <div className="transactions-account">
           <div className="flex flex-col gap-2">
             <h2 className="text-18 font-bold text-white">
-              {account?.data.name}
+              {account?.data?.name}
             </h2>
             <p className="text-14 text-blue-25"> </p>
             <p className="text-24 font-semibold tracking-[1.1px] text-white">
-              {account?.data.accountNumber}
+              {account?.data?.accountNumber}
             </p>
           </div>
 
           <div className="transactions-account-balance">
             <p className="text-14">Current balance</p>
             <p className="text-24 text-center font-bold">
-              {formatAmount(account?.data.currentBalance)}
+              {formatAmount(account?.data?.currentBalance ?? 0)}
             </p>
           </div>
         </div>

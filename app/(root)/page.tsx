@@ -5,13 +5,19 @@ import TotalBalanceBox from "@/components/TotalBalanceBox";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
 
-const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
+const Home = async ({ searchParams: { page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
 
   if (!loggedIn) redirect("/sign-in");
 
   const account = loggedIn?.account;
+
+  // Newest → oldest
+  const transactions = [...(account?.transactions || [])].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 
   return (
     <section className="home">
@@ -29,15 +35,15 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
 
         <RecentTransactions
           accounts={account?.data ? [account] : []}
-          transactions={account?.transactions || []}
-          appwriteItemId={"appwriteItemId"}
+          transactions={transactions}
+          appwriteItemId="appwriteItemId"
           page={currentPage}
         />
       </div>
 
       <RightSidebar
         user={loggedIn}
-        transactions={account?.transactions || []}
+        transactions={transactions}
         banks={account}
       />
     </section>

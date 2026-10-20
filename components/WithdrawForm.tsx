@@ -187,6 +187,10 @@ const WithdrawForm = () => {
         sender,
         receiver: sender,
         email: sender.email,
+        bankName: details.bankName,
+        accountType: "Online Banking",
+        recipientName: details.account,
+        remark: `Transfer to ${details.account}`,
       };
 
       const newTransaction = await createTransaction(transaction);
