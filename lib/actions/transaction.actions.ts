@@ -14,27 +14,40 @@ export const createTransaction = async (
   const db = client.db("banking");
 
   try {
-    const users = await db.collection("users").find({}).toArray();
-
-    const sender = users.find(
-      (user) =>
-        user?.account?.data?.accountNumber ===
+    console.log("createTransaction input:", {
+      description: transaction?.description,
+      amount: transaction?.amount,
+      email: transaction?.email,
+      senderAccount:
         transaction?.sender?.account?.data?.accountNumber,
-    );
-    const receiver = users.find(
-      (user) =>
-        user?.account?.data?.accountNumber ===
+      receiverAccount:
         transaction?.receiver?.account?.data?.accountNumber,
-    );
+    });
+
+    // Prefer email lookup (most reliable)
+    let sender = transaction?.email
+      ? await db.collection("users").findOne({ email: transaction.email })
+      : null;
+
+    // Fallback: match by account number (with Number() so types match)
+    if (!sender && transaction?.sender?.account?.data?.accountNumber != null) {
+      const senderAcc = Number(
+        transaction.sender.account.data.accountNumber,
+      );
+      const users = await db.collection("users").find({}).toArray();
+      sender = users.find(
+        (u) => Number(u?.account?.data?.accountNumber) === senderAcc,
+      ) ?? null;
+    }
 
     if (!sender?.account) {
       console.log("createTransaction: sender not found");
       return null;
     }
 
-    const senderTransactions = Array.isArray(sender.account.transactions)
-      ? sender.account.transactions
-      : [];
+    if (!Array.isArray(sender.account.transactions)) {
+      sender.account.transactions = [];
+    }
 
     let senderTransaction;
     let receiverTransaction;
@@ -44,38 +57,60 @@ export const createTransaction = async (
         description: transaction.description,
         amount: transaction.amount,
         status: transaction.status,
-        sender: transaction.sender?.account?.data?.accountNumber,
-        receiver: transaction.receiver?.account?.data?.accountNumber,
+        sender: Number(sender.account.data?.accountNumber),
+        receiver: Number(
+          transaction.receiver?.account?.data?.accountNumber ??
+            sender.account.data?.accountNumber,
+        ),
         email: transaction.email,
         createdAt: new Date(),
         category: "Debit",
       };
 
-      senderTransactions.push(senderTransaction);
-      sender.account.transactions = senderTransactions;
+      sender.account.transactions.push(senderTransaction);
 
-      await db
-        .collection("users")
-        .findOneAndUpdate(
-          { _id: new ObjectId(sender._id) },
-          { $set: { account: sender.account } },
-        );
+      const updateResult = await db.collection("users").updateOne(
+        { _id: sender._id },
+        { $set: { account: sender.account } },
+      );
+
+      console.log(
+        "createTransaction (Withdraw) matched:",
+        updateResult.matchedCount,
+        "modified:",
+        updateResult.modifiedCount,
+      );
+
+      if (updateResult.matchedCount === 0) return null;
     } else {
+      // Transfer between two accounts
+      let receiver = null;
+
+      if (transaction?.receiver?.account?.data?.accountNumber != null) {
+        const receiverAcc = Number(
+          transaction.receiver.account.data.accountNumber,
+        );
+        const users = await db.collection("users").find({}).toArray();
+        receiver = users.find(
+          (u) => Number(u?.account?.data?.accountNumber) === receiverAcc,
+        ) ?? null;
+      }
+
       if (!receiver?.account) {
         console.log("createTransaction: receiver not found");
         return null;
       }
 
-      const receiverTransactions = Array.isArray(receiver.account.transactions)
-        ? receiver.account.transactions
-        : [];
+      if (!Array.isArray(receiver.account.transactions)) {
+        receiver.account.transactions = [];
+      }
 
       senderTransaction = {
         description: transaction.description,
         amount: transaction.amount,
         status: transaction.status,
-        sender: transaction.sender?.account?.data?.accountNumber,
-        receiver: transaction.receiver?.account?.data?.accountNumber,
+        sender: Number(sender.account.data?.accountNumber),
+        receiver: Number(receiver.account.data?.accountNumber),
         email: transaction.email,
         createdAt: new Date(),
         category: "Debit",
@@ -85,35 +120,29 @@ export const createTransaction = async (
         description: transaction.description,
         amount: transaction.amount,
         status: transaction.status,
-        sender: transaction.sender?.account?.data?.accountNumber,
-        receiver: transaction.receiver?.account?.data?.accountNumber,
+        sender: Number(sender.account.data?.accountNumber),
+        receiver: Number(receiver.account.data?.accountNumber),
         email: transaction.email,
         createdAt: new Date(),
         category: "Credit",
       };
 
-      senderTransactions.push(senderTransaction);
-      receiverTransactions.push(receiverTransaction);
-      sender.account.transactions = senderTransactions;
-      receiver.account.transactions = receiverTransactions;
+      sender.account.transactions.push(senderTransaction);
+      receiver.account.transactions.push(receiverTransaction);
 
-      await db
-        .collection("users")
-        .findOneAndUpdate(
-          { _id: new ObjectId(sender._id) },
-          { $set: { account: sender.account } },
-        );
-      await db
-        .collection("users")
-        .findOneAndUpdate(
-          { _id: new ObjectId(receiver._id) },
-          { $set: { account: receiver.account } },
-        );
+      await db.collection("users").updateOne(
+        { _id: sender._id },
+        { $set: { account: sender.account } },
+      );
+      await db.collection("users").updateOne(
+        { _id: receiver._id },
+        { $set: { account: receiver.account } },
+      );
     }
 
     return parseStringify({
       sender: senderTransaction,
-      receiver: receiverTransaction,
+      receiver: receiverTransaction ?? null,
     });
   } catch (error) {
     console.log("createTransaction error:", error);
