@@ -38,14 +38,14 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
 
   return (
     <>
-      <TransactionDetailModal
+      {/* <TransactionDetailModal
         isOpen={open}
         onClose={() => {
           setOpen(false);
           setSelected(null);
         }}
         transaction={selected}
-      />
+      /> */}
 
       <Table>
         <TableHeader className="bg-[#f9fafb]">
