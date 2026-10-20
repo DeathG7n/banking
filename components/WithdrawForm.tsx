@@ -172,6 +172,8 @@ const WithdrawForm = () => {
         email: sender.email,
       });
 
+      console.log("subtractFromBalance result:", update);
+
       if (!update) {
         alert("Failed to update balance. Check server logs or try again.");
         return;
