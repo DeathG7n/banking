@@ -7,7 +7,11 @@ import { createAccountNumber } from "./bank.actions";
 
 export const signIn = async ({ email, password }: signInProps) => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) {
+    return { success: false, message: "Database not configured", user: null };
+  }
+
+  const client = new MongoClient(uri);
 
   try {
     await client.connect();
@@ -52,7 +56,11 @@ export const signIn = async ({ email, password }: signInProps) => {
 
 export const signUp = async (userData: SignUpParams) => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) {
+    return { success: false, message: "Database not configured", user: null };
+  }
+
+  const client = new MongoClient(uri);
 
   try {
     await client.connect();
@@ -92,7 +100,9 @@ export const signUp = async (userData: SignUpParams) => {
 
 export const createUser = async (userData: CreateUser) => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) throw new Error("MONGODB_URI is not defined");
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
   const users = db.collection<User>("users");
@@ -122,17 +132,29 @@ export const createUser = async (userData: CreateUser) => {
 
 export async function getLoggedInUser() {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) return null;
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
   const users = db.collection<User>("users");
+
   const id = cookies().get("user-id");
+
+  // FIX: guard against missing cookie (this was the TypeError)
+  if (!id?.value) {
+    await client.close();
+    return null;
+  }
+
   try {
     const user = await users.findOne({
-      _id: new ObjectId(id!.value),
+      _id: new ObjectId(id.value),
     });
 
-    if (user!.account!.data!.accountNumber === 0) {
+    if (!user) return null;
+
+    if (user.account?.data?.accountNumber === 0) {
       await createAccountNumber();
     }
 
@@ -140,6 +162,8 @@ export async function getLoggedInUser() {
   } catch (error) {
     console.log(error);
     return null;
+  } finally {
+    await client.close();
   }
 }
 
@@ -154,67 +178,93 @@ export const logoutAccount = async () => {
 
 export async function getActiveAccounts() {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) return null;
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection("users").find({}).toArray();
+
   try {
-    let accounts = [];
+    const users = await db.collection("users").find({}).toArray();
+    const accounts: string[] = [];
+
     for (let i = 0; i < users.length; i++) {
       const account = users[i].account;
-      accounts.push(String(account.data.accountNumber));
+      if (account?.data?.accountNumber) {
+        accounts.push(String(account.data.accountNumber));
+      }
     }
     return parseStringify(accounts);
   } catch (error) {
     console.log(error);
     return null;
+  } finally {
+    await client.close();
   }
 }
 
 export const getAccountById = async ({ accountId }: getAccountByIdProps) => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) return null;
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection("users").find({}).toArray();
+
   try {
+    const users = await db.collection("users").find({}).toArray();
     const user = users.find(
-      (user) => user?.account?.data?.accountNumber === Number(accountId),
+      (u) => u?.account?.data?.accountNumber === Number(accountId),
     );
-    return parseStringify(user!.account);
+
+    if (!user?.account) return null;
+    return parseStringify(user.account);
   } catch (error) {
     console.log(error);
     return null;
+  } finally {
+    await client.close();
   }
 };
 
 export const getUsers = async () => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) return null;
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection("users").find({}).toArray();
+
   try {
+    const users = await db.collection("users").find({}).toArray();
     return parseStringify(users);
   } catch (error) {
     console.log(error);
     return null;
+  } finally {
+    await client.close();
   }
 };
 
 export const getUserByEmail = async ({ accountId }: getAccountByIdProps) => {
   const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri!);
+  if (!uri) return null;
+
+  const client = new MongoClient(uri);
   await client.connect();
   const db = client.db("banking");
-  const users = await db.collection("users").find({}).toArray();
+
   try {
+    const users = await db.collection("users").find({}).toArray();
     const user = users.find(
-      (user) => user?.account?.data?.accountNumber === Number(accountId),
+      (u) => u?.account?.data?.accountNumber === Number(accountId),
     );
+    if (!user) return null;
     return parseStringify(user);
   } catch (error) {
     console.log(error);
     return null;
+  } finally {
+    await client.close();
   }
 };

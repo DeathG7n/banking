@@ -1,14 +1,17 @@
-import HeaderBox from '@/components/HeaderBox'
-import WithdrawForm from '@/components/WithdrawForm';
-import { getLoggedInUser } from '@/lib/actions/user.actions';
-import React from 'react'
+import HeaderBox from "@/components/HeaderBox";
+import WithdrawForm from "@/components/WithdrawForm";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
+import { redirect } from "next/navigation";
+import React from "react";
 
 const Withdraw = async () => {
   const loggedIn = await getLoggedInUser();
 
+  if (!loggedIn) redirect("/sign-in");
+
   return (
     <section className="payment-transfer">
-      <HeaderBox 
+      <HeaderBox
         title="Transfer"
         subtext="Please provide details for your payment"
       />
@@ -17,8 +20,7 @@ const Withdraw = async () => {
         <WithdrawForm />
       </section>
     </section>
-  )
-}
+  );
+};
 
-export default Withdraw
-
+export default Withdraw;

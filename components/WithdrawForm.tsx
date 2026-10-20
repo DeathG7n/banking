@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,57 +13,64 @@ import {
   deleteOTP,
 } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
+import {
+  createTransaction,
+  subtractFromBalance,
+} from "@/lib/actions/transaction.actions";
 import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import {
-  createTransaction,
-  subtractFromBalance,
-} from "@/lib/actions/transaction.actions";
-import { X, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const WithdrawForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [otp, setOtp] = useState(false);
-  const [details, setDetails] = useState({
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [details, setDetails] = useState<{
+    account: string;
+    bankName: string;
+    amount: string;
+    otp?: string;
+  }>({
     account: "",
     bankName: "",
     amount: "",
   });
-  const [popup, setPopUp] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Schema depends on whether OTP modal is open and current user OTP
   const formSchema = z.object({
-    account: z.string().min(8),
+    account: z.string().min(8, "Account number must be at least 8 characters"),
     amount: z
       .string()
-      .min(1, "Amount is too short")
+      .min(1, "Amount is required")
       .refine(
-        (val) => Number(val) < Number(user!.account!.data!.currentBalance),
+        (val) =>
+          Number(val) > 0 &&
+          Number(val) <= Number(user?.account?.data?.currentBalance ?? 0),
         {
-          message: "Amount is greater than account balance",
+          message: "Amount must be greater than 0 and not exceed balance",
         },
       ),
     bankName: z.string().min(4, "Please enter your bank name."),
-    otp: otp
+    otp: showOtpModal
       ? z
           .string()
-          .min(6, "OTP must contain at least 6 characters")
-          .max(6)
+          .min(6, "OTP must be 6 digits")
+          .max(6, "OTP must be 6 digits")
           .regex(/^\d+$/, "OTP must contain only numbers")
-          .refine((val) => Number(val) === Number(user!.otp!.code), {
-            message: "Wrong OTP",
-          })
+          .refine(
+            (val) => Number(val) === Number(user?.otp?.code),
+            { message: "Wrong OTP" },
+          )
       : z.string().optional(),
   });
 
@@ -77,45 +84,95 @@ const WithdrawForm = () => {
     },
   });
 
+  // Load user once on mount
+  useEffect(() => {
+    const loadUser = async () => {
+      const sender = await getLoggedInUser();
+      setUser(sender);
+
+      if (sender?.otp?.code && sender.otp.code !== 0) {
+        const expiryTime = 10 * 60 * 1000;
+        const createdAt = new Date(sender.otp.createdAt).getTime();
+        if (Date.now() - createdAt >= expiryTime) {
+          await deleteOTP();
+          setUser({
+            ...sender,
+            otp: { code: 0, createdAt: new Date() },
+          });
+        }
+      }
+    };
+    loadUser();
+  }, []);
+
   const requestOtp = async () => {
-    setIsLoading(true)
-    await createOTP();
-    setOtp(true);
-    setIsLoading(false)
+    // Validate the main fields first
+    const valid = await form.trigger(["account", "amount", "bankName"]);
+    if (!valid) return;
+
+    setIsLoading(true);
+    try {
+      const updatedUser = await createOTP();
+      if (updatedUser) {
+        setUser(updatedUser); // refresh OTP in state so validation works
+        setShowOtpModal(true);
+      } else {
+        alert("Failed to send OTP. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error sending OTP");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const submit = async (data: z.infer<typeof formSchema>) => {
+  // Called when user confirms OTP in the OTP modal
+  const onOtpSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!data.otp) {
+      alert("Please enter the OTP");
+      return;
+    }
     setDetails(data);
-    setPopUp(true);
-    setOtp(false);
-    if (data.otp === "") return;
+    setShowOtpModal(false);
+    setShowConfirmModal(true);
   };
 
-  const confirm = async (data: any) => {
-    if (data.otp === "") return;
+  // Called when user confirms the transfer in the confirm modal
+  const confirmTransfer = async () => {
+    if (!details.otp) {
+      alert("OTP is required");
+      return;
+    }
+
     setIsConfirming(true);
 
     try {
       const withDrawParams = {
-        account: data.account,
-        amount: Number(data.amount),
-        bankName: data.bankName,
+        account: details.account,
+        amount: Number(details.amount),
+        bankName: details.bankName,
       };
 
       const withdraw = await createWithdraw(withDrawParams);
 
       if (withdraw) {
         const sender = await getLoggedInUser();
-        const updateBalance = {
-          amount: data.amount,
+        if (!sender) {
+          alert("Session expired. Please sign in again.");
+          router.push("/sign-in");
+          return;
+        }
+
+        const update = await subtractFromBalance({
+          amount: details.amount,
           email: sender.email,
-        };
-        const update = await subtractFromBalance(updateBalance);
+        });
 
         if (update) {
           const transaction = {
             description: "Withdraw",
-            amount: String(data.amount),
+            amount: String(details.amount),
             status: "Success",
             sender,
             receiver: sender,
@@ -125,51 +182,46 @@ const WithdrawForm = () => {
           const newTransaction = await createTransaction(transaction);
 
           if (newTransaction) {
+            await deleteOTP(); // clear OTP after success
             form.reset();
+            setShowConfirmModal(false);
             router.push("/");
-            setPopUp(false);
+            router.refresh();
+          } else {
+            alert("Failed to create transaction");
           }
+        } else {
+          alert("Failed to update balance");
         }
+      } else {
+        alert("Failed to process withdrawal");
       }
     } catch (error) {
       console.error(error);
+      alert("Something went wrong. Please try again.");
     } finally {
       setIsConfirming(false);
     }
   };
-  useEffect(() => {
-    const getUser = async () => {
-      const sender = await getLoggedInUser();
-      setUser(sender);
-      if (sender?.otp?.code !== 0) {
-        const expiryTime = 10 * 60 * 1000;
-        const now = Date.now();
-        if (now - sender?.otp?.createdAt >= expiryTime) {
-          await deleteOTP();
-        } else {
-          console.log("Still valid");
-        }
-      }
-    };
-    getUser();
-  }, [user]);
 
   return (
     <Form {...form}>
       <TransferModal
-        isOpen={popup}
+        isOpen={showConfirmModal}
         details={details}
         user={user}
-        onClose={() => setPopUp(false)}
-        onConfirm={() => confirm(details)}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmTransfer}
         loading={isConfirming}
       />
+
       <OTPModal
-        isOpen={otp}
+        isOpen={showOtpModal}
         control={form.control}
-        onClose={() => setOtp(false)}
-        onConfirm={form.handleSubmit(submit)}
+        onClose={() => setShowOtpModal(false)}
+        onConfirm={form.handleSubmit(onOtpSubmit)}
       />
+
       <form className="flex flex-col">
         <FormField
           control={form.control}
@@ -194,6 +246,7 @@ const WithdrawForm = () => {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="amount"
@@ -245,16 +298,16 @@ const WithdrawForm = () => {
         <div className="payment-transfer_btn-box">
           <Button
             type="button"
-            disabled={isLoading}
+            disabled={isLoading || !user}
             className="payment-transfer_btn"
-            onClick={() => requestOtp()}
+            onClick={requestOtp}
           >
             {isLoading ? (
               <>
                 <Loader2 size={20} className="animate-spin" /> &nbsp; Sending...
               </>
             ) : (
-              "Request Otp"
+              "Request OTP"
             )}
           </Button>
         </div>
@@ -265,29 +318,21 @@ const WithdrawForm = () => {
 
 export default WithdrawForm;
 
-function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: any) {
+function TransferModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  user,
+  details,
+  loading,
+}: any) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center">
-      {/* Modal Container */}
-      <div className="w-[90%] lg:w-[60%]  bg-white border rounded-lg flex flex-col gap-2 p-4">
-        {/* Header */}
+    <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center z-50">
+      <div className="w-[90%] lg:w-[60%] bg-white border rounded-lg flex flex-col gap-2 p-4">
         <div className="flex items-center justify-between border-b border-gray-100">
           <div className="flex items-center gap-2.5 text-slate-800">
-            <svg
-              className="h-5 w-5 text-slate-700"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
             <h2 className="font-semibold text-slate-800 text-[17px]">
               Confirm Transfer Details
             </h2>
@@ -300,9 +345,7 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: a
           </button>
         </div>
 
-        {/* Content Body */}
         <div className="space-y-5">
-          {/* Transfer Summary Card */}
           <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 space-y-3.5">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
               Transfer Summary
@@ -312,13 +355,6 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: a
               <span className="text-gray-500">Amount</span>
               <span className="font-medium text-slate-700">
                 ${details.amount}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-start text-sm">
-              <span className="text-gray-500">Recipient</span>
-              <span className="font-semibold text-slate-800 text-right max-w-[70%]">
-                Hi {user?.account?.data.name}
               </span>
             </div>
 
@@ -336,11 +372,6 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: a
               </span>
             </div>
 
-            <div className="flex justify-between items-start text-sm">
-              <span className="text-gray-500">Account Type</span>
-              <span className="font-medium text-slate-700">Online Banking</span>
-            </div>
-
             <hr className="border-gray-200/60 my-2" />
 
             <div className="flex justify-between items-start text-sm pt-1">
@@ -356,13 +387,12 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: a
               </span>
               <span className="font-medium text-gray-500 text-[13px]">
                 $
-                {Number(user?.account?.data.currentBalance) -
+                {Number(user?.account?.data?.currentBalance ?? 0) -
                   Number(details.amount)}
               </span>
             </div>
           </div>
 
-          {/* Warning Banner */}
           <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
             <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
             <p className="text-xs leading-relaxed text-amber-800/80 font-medium">
@@ -371,12 +401,11 @@ function TransferModal({ isOpen, onClose, onConfirm, user, details, loading }: a
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="space-y-3 pt-2">
-            
             <button
               onClick={onConfirm}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d357d] py-3.5 px-4 font-semibold text-white shadow-sm hover:bg-[#162a64] active:bg-[#11204c] transition-colors"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d357d] py-3.5 px-4 font-semibold text-white shadow-sm hover:bg-[#162a64] active:bg-[#11204c] transition-colors disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -409,25 +438,10 @@ function OTPModal({ isOpen, onClose, onConfirm, control }: any) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center">
-      {/* Modal Container */}
-      <div className="w-[90%] lg:w-[60%]  bg-white border rounded-lg flex flex-col gap-2 p-4">
-        {/* Header */}
+    <div className="fixed backdrop-blur-sm w-screen h-screen top-0 left-0 flex flex-center z-50">
+      <div className="w-[90%] lg:w-[60%] bg-white border rounded-lg flex flex-col gap-2 p-4">
         <div className="flex items-center justify-between border-b border-gray-100">
           <div className="flex items-center gap-2.5 text-slate-800">
-            <svg
-              className="h-5 w-5 text-slate-700"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
             <h2 className="font-semibold text-slate-800 text-[17px]">
               Enter One Time Password
             </h2>
@@ -440,7 +454,6 @@ function OTPModal({ isOpen, onClose, onConfirm, control }: any) {
           </button>
         </div>
 
-        {/* Content Body */}
         <div className="space-y-5">
           <FormField
             control={control}
@@ -456,6 +469,7 @@ function OTPModal({ isOpen, onClose, onConfirm, control }: any) {
                       <Input
                         placeholder="094384"
                         className="input-class"
+                        maxLength={6}
                         {...field}
                       />
                     </FormControl>
@@ -465,7 +479,7 @@ function OTPModal({ isOpen, onClose, onConfirm, control }: any) {
               </FormItem>
             )}
           />
-          {/* Action Buttons */}
+
           <div className="space-y-3 pt-2">
             <button
               onClick={onConfirm}

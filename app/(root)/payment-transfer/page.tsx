@@ -1,16 +1,19 @@
-import HeaderBox from '@/components/HeaderBox'
-import PaymentTransferForm from '@/components/PaymentTransferForm'
-import { getLoggedInUser } from '@/lib/actions/user.actions';
-import React from 'react'
+import HeaderBox from "@/components/HeaderBox";
+import PaymentTransferForm from "@/components/PaymentTransferForm";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
+import { redirect } from "next/navigation";
+import React from "react";
 
 const Transfer = async () => {
   const loggedIn = await getLoggedInUser();
-  
+
+  if (!loggedIn) redirect("/sign-in");
+
   const account = loggedIn.account;
 
   return (
     <section className="payment-transfer">
-      <HeaderBox 
+      <HeaderBox
         title="Transfer Locally"
         subtext="Please provide any specific details or notes related to the payment transfer"
       />
@@ -19,7 +22,7 @@ const Transfer = async () => {
         <PaymentTransferForm account={account} />
       </section>
     </section>
-  )
-}
+  );
+};
 
-export default Transfer
+export default Transfer;

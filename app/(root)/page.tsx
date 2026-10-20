@@ -3,11 +3,15 @@ import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
+import { redirect } from "next/navigation";
 
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const account = loggedIn?.account
+
+  if (!loggedIn) redirect("/sign-in");
+
+  const account = loggedIn?.account;
 
   return (
     <section className="home">
@@ -20,14 +24,12 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
             subtext="Access and manage your account and transactions efficiently."
           />
 
-          <TotalBalanceBox
-            user={loggedIn}
-          />
+          <TotalBalanceBox user={loggedIn} />
         </header>
 
         <RecentTransactions
-          accounts={account?.data}
-          transactions={account?.transactions}
+          accounts={account?.data ? [account] : []}
+          transactions={account?.transactions || []}
           appwriteItemId={"appwriteItemId"}
           page={currentPage}
         />
@@ -35,7 +37,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
 
       <RightSidebar
         user={loggedIn}
-        transactions={account?.transactions}
+        transactions={account?.transactions || []}
         banks={account}
       />
     </section>
